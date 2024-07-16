@@ -8,9 +8,7 @@ def init_db():
 
 
 def add_team(name):
-    team = Team(name=name)
-    team.save()
-    return team
+    return Team.create(name=name)
 
 
 def add_game(kickoff, team1, team2):
