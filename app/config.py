@@ -1,10 +1,10 @@
 import os
 
 DATABASE = {
-    'name': 'mydatabase',
+    'name': os.getenv('DB_NAME'),
     'engine': 'peewee.PostgresqlDatabase',
-    'user': os.getenv('POSTGRES_USER', 'username'),
-    'password': os.getenv('POSTGRES_PASSWORD', 'password'),
-    'host': os.getenv('POSTGRES_HOST', 'db'),
-    'port': int(os.getenv('POSTGRES_PORT', 5432)),
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD'),
+    'host': os.getenv('DB_HOST'),
+    'port': int(os.getenv('DB_PORT', 5432)),
 }
