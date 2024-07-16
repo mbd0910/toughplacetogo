@@ -1,28 +1,27 @@
-from models import db, User
+from models import db, Team
 
 
 def init_db():
     db.connect()
-    db.create_tables([User])
+    db.create_tables([Team])
 
 
-def add_user(name, age):
-    user = User(name=name, age=age)
-    user.save()
+def add_team(name):
+    team = Team(name=name)
+    team.save()
 
 
-def get_users():
-    return User.select()
+def get_teams():
+    return Team.select()
 
 
 if __name__ == '__main__':
     init_db()
 
-    # Adding users
-    add_user('Alice', 30)
-    add_user('Bob', 25)
+    add_team('Charlton Athletic')
+    add_team('Notts County')
 
     # Fetching and displaying users
-    users = get_users()
-    for user in users:
-        print(f'User {user.id}: {user.name}, {user.age} years old')
+    teams = get_teams()
+    for team in teams:
+        print(f'Team {team.id}: {team.name}')

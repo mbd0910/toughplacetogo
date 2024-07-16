@@ -1,5 +1,6 @@
-# models.py
-from peewee import Model, CharField, IntegerField, PostgresqlDatabase
+from datetime import datetime
+from peewee import CharField, DateTimeField, PostgresqlDatabase
+from playhouse.signals import pre_save, Model
 from config import DATABASE
 
 db = PostgresqlDatabase(
@@ -16,6 +17,17 @@ class BaseModel(Model):
         database = db
 
 
-class User(BaseModel):
+class TimestampableModel(BaseModel):
+    created_at = DateTimeField()
+    updated_at = DateTimeField()
+
+
+class Team(TimestampableModel):
     name = CharField()
-    age = IntegerField()
+
+
+@pre_save(sender=TimestampableModel)
+def on_save_handler(model_class, instance, created):
+    if created:
+        instance.created_at = datetime.now()
+    instance.updated_at = datetime.now()
