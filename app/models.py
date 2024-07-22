@@ -38,12 +38,15 @@ class Game(TimestampableModel):
     def team(self, number):
         for game_team in self.game_teams:
             if game_team.number == number:
-                return game_team.team
+                return game_team
         raise Exception(f'Cannot find game team with index {number}')
 
 
 class GameTeam(TimestampableModel):
     number = IntegerField()
+    half_time_score = IntegerField(null=True)
+    full_time_score = IntegerField(null=True)
+    after_extra_time_score = IntegerField(null=True)
     team = ForeignKeyField(Team, backref='game_teams')
     game = ForeignKeyField(Game, backref='game_teams')
 
@@ -51,5 +54,5 @@ class GameTeam(TimestampableModel):
 @pre_save(sender=TimestampableModel)
 def on_save_handler(model_class, instance, created):
     if created:
-        instance.created_at = datetime.now()
-    instance.updated_at = datetime.now()
+        instance.created_at = datetime.utcnow()
+    instance.updated_at = datetime.utcnow()

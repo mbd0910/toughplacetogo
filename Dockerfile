@@ -14,8 +14,11 @@ COPY requirements.txt .
 # Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# For saving files
+RUN mkdir -p /data
+
 # Copy the rest of the application
 COPY . .
 
 # Command to run the application
-CMD ["dockerize", "-wait", "tcp://db:5432", "-timeout", "60s", "python", "app/main.py"]
+CMD ["dockerize", "-wait", "tcp://db:5432", "-timeout", "60s", "python", "app/fpl_import.py"]
