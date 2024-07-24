@@ -23,7 +23,7 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
-      - /Users/michael/Downloads/FPL-API-Calls/202425:/data
+      - /Users/michael/Documents/Football:/data
 
 volumes:
   postgres_data:

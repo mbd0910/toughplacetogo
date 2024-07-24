@@ -21,4 +21,7 @@ RUN mkdir -p /data
 COPY . .
 
 # Command to run the application
-CMD ["dockerize", "-wait", "tcp://db:5432", "-timeout", "60s", "python", "app/fpl_import.py"]
+#CMD ["dockerize", "-wait", "tcp://db:5432", "-timeout", "60s", "python", "app/fpl_import.py"]
+
+# Command to keep the container running
+CMD ["tail", "-f", "/dev/null"]

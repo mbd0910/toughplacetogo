@@ -42,6 +42,21 @@ class Game(TimestampableModel):
         raise Exception(f'Cannot find game team with index {number}')
 
 
+class Competition(TimestampableModel):
+    name = CharField()
+
+
+class Season(TimestampableModel):
+    name = CharField()
+    competition = ForeignKeyField(Competition, backref='seasons')
+
+
+class Stage(TimestampableModel):
+    name = CharField()
+    season = ForeignKeyField(Season, backref='stages')
+    # Could consider a foreign key to the competition here, but not strictly necessary
+
+
 class GameTeam(TimestampableModel):
     number = IntegerField()
     half_time_score = IntegerField(null=True)
