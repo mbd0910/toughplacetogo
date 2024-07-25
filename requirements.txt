@@ -1,8 +1,10 @@
 certifi==2024.7.4
 charset-normalizer==3.3.2
 idna==3.7
+numpy==2.0.1
 peewee==3.17.6
 psycopg2-binary==2.9.9
 pytz==2024.1
 requests==2.32.3
+scipy==1.13.1
 urllib3==2.2.2

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from datetime import datetime
 from peewee import CharField, DateTimeField, PostgresqlDatabase, ForeignKeyField, IntegerField
 from playhouse.signals import pre_save, Model
@@ -25,17 +26,20 @@ class TimestampableModel(BaseModel):
 class Team(TimestampableModel):
     name = CharField()
 
+    def __str__(self):
+        return f"{self.name} ({self.id})"
+
 
 class Game(TimestampableModel):
     kickoff = DateTimeField()
 
-    def home_team(self):
+    def home_team(self) -> GameTeam:
         return self.team(1)
 
-    def away_team(self):
+    def away_team(self) -> GameTeam:
         return self.team(2)
 
-    def team(self, number):
+    def team(self, number) -> GameTeam:
         for game_team in self.game_teams:
             if game_team.number == number:
                 return game_team
