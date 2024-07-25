@@ -30,22 +30,6 @@ class Team(TimestampableModel):
         return f"{self.name} ({self.id})"
 
 
-class Game(TimestampableModel):
-    kickoff = DateTimeField()
-
-    def home_team(self) -> GameTeam:
-        return self.team(1)
-
-    def away_team(self) -> GameTeam:
-        return self.team(2)
-
-    def team(self, number) -> GameTeam:
-        for game_team in self.game_teams:
-            if game_team.number == number:
-                return game_team
-        raise Exception(f'Cannot find game team with index {number}')
-
-
 class Competition(TimestampableModel):
     name = CharField()
 
@@ -59,6 +43,23 @@ class Stage(TimestampableModel):
     name = CharField()
     season = ForeignKeyField(Season, backref='stages')
     # Could consider a foreign key to the competition here, but not strictly necessary
+
+
+class Game(TimestampableModel):
+    kickoff = DateTimeField()
+    stage = ForeignKeyField(Stage, backref='games')
+
+    def home_team(self) -> GameTeam:
+        return self.team(1)
+
+    def away_team(self) -> GameTeam:
+        return self.team(2)
+
+    def team(self, number) -> GameTeam:
+        for game_team in self.game_teams:
+            if game_team.number == number:
+                return game_team
+        raise Exception(f'Cannot find game team with index {number}')
 
 
 class GameTeam(TimestampableModel):
