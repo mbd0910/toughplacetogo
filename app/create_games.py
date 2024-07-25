@@ -23,7 +23,7 @@ def empty_string_to_none(s):
     return None if s == "" else s
 
 
-def process_csv_file(file_path, teams_by_name):
+def process_csv_file(file_path, teams_by_name, stage):
     with open(file_path, mode='r', newline='', encoding='Windows-1252') as csv_file:
         reader = csv.DictReader(csv_file)
         for row in reader:
@@ -38,26 +38,48 @@ def process_csv_file(file_path, teams_by_name):
 
             kickoff = parse_date(date)
 
-            game = Game.create(kickoff=kickoff)
+            game = Game.create(kickoff=kickoff, stage=stage)
             GameTeam.create(number=1, team=teams_by_name[home_team_name], game=game,
                             full_time_score=ft_home_goals, half_time_score=ht_home_goals)
             GameTeam.create(number=2, team=teams_by_name[away_team_name], game=game,
                             full_time_score=ft_away_goals, half_time_score=ht_away_goals)
 
 
+def competition_from_file_name(file):
+    match file:
+        case 'E0.csv':
+            return 'Premier League'
+        case 'E1.csv':
+            return 'Championship'
+        case 'E2.csv':
+            return 'League One'
+        case 'E3.csv':
+            return 'League Two'
+        case 'EC.csv':
+            return 'National League'
+
+
 # Main function to traverse directories and process all CSV files
 def main(directory, teams_by_name):
-    print("Start of main")
-    # Traverse the directory and its subdirectories
     for root, dirs, files in os.walk(directory):
-        print(f"Visiting directory: {root}")  # Debug print
-        print(f"Subdirectories: {dirs}")      # Debug print
-        print(f"Files: {files}")              # Debug print
+        containing_folder = os.path.basename(root)
         for file in files:
             if file in ['E0.csv', 'E1.csv', 'E2.csv', 'E3.csv', 'EC.csv']:
+                season_name = containing_folder.replace(':', '/')
+                competition_name = competition_from_file_name(file)
+                stage_query = (Stage.select()
+                               .join(Season)
+                               .join(Competition)
+                               .where(
+                                    Stage.name == 'Regular Season',
+                                    Season.name == season_name,
+                                    Competition.name == competition_name)
+                               )
+                stage = stage_query.get()
                 file_path = os.path.join(root, file)
                 print(f"Processing file: {file_path}")
-                process_csv_file(file_path, teams_by_name)
+                print(f"Stage {stage.name}, {stage.season.name}, {stage.season.competition.name}")
+                process_csv_file(file_path, teams_by_name, stage)
                 # Persist the games
 
 
