@@ -67,7 +67,7 @@ class GameTeam(TimestampableModel):
     half_time_score = IntegerField(null=True)
     full_time_score = IntegerField(null=True)
     after_extra_time_score = IntegerField(null=True)
-    team = ForeignKeyField(Team, backref='game_teams')
+    team: Team = ForeignKeyField(Team, backref='game_teams')
     game = ForeignKeyField(Game, backref='game_teams')
 
 
