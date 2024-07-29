@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from scipy.optimize import minimize
 from scipy.stats import poisson
@@ -13,9 +14,9 @@ HOME_FAIR_PROBABILITY = 1/HOME_BOOKIE_ODDS/total_sum
 AWAY_FAIR_PROBABILITY = 1/AWAY_BOOKIE_ODDS/total_sum
 DRAW_FAIR_PROBABILITY = 1/DRAW_BOOKIE_ODDS/total_sum
 
-tg_line = 3.0
-OVER_BOOKIE_ODDS = 2.39
-UNDER_BOOKIE_ODDS = 1.67
+tg_line = 2.75
+OVER_BOOKIE_ODDS = 2.04
+UNDER_BOOKIE_ODDS = 1.9
 total_sum = 1/OVER_BOOKIE_ODDS + 1/UNDER_BOOKIE_ODDS
 print(f"total sum is {total_sum}")
 OVER_FAIR_PROBABILITY = 1/OVER_BOOKIE_ODDS/total_sum
@@ -28,12 +29,42 @@ print(f"Bookie odds were unders: {UNDER_BOOKIE_ODDS}")
 print(f"Over is {OVER_FAIR_ODDS}")
 print(f"Under is {UNDER_FAIR_ODDS}")
 
+
+def find_nearest_tg_lines(value):
+    # Split the float into its fractional and integral parts
+    fractional, integral = math.modf(value)
+
+    # Check if the fractional part is .25 or .75
+    if fractional == 0.0:
+        return integral, integral
+    elif fractional == 0.25:
+        return integral, integral + 0.5
+    elif fractional == 0.5:
+        return integral + 0.5, integral + 0.5
+    elif fractional == 0.75:
+        return integral + 0.5, integral + 1.0
+    else:
+        raise Exception(f"Unsupported fractional suffix in {value}")
+
 def error(par):
     homeXG = np.exp(par[0])
     awayXG = np.exp(par[1])
 
-    home_sum = away_sum = draw_sum = overs_sum = unders_sum = 0
-    exact_line = 0
+    home_sum = away_sum = draw_sum = 0
+    nearest_tg_lines = find_nearest_tg_lines(tg_line)
+    tg_line_totals = {
+        nearest_tg_lines[0]: {
+            'overs_sum': 0,
+            'unders_sum': 0,
+            'exact_line_sum': 0
+        },
+        nearest_tg_lines[1]: {
+            'overs_sum': 0,
+            'unders_sum': 0,
+            'exact_line_sum': 0
+        }
+    }
+
     for i in range(16):
         for j in range(16):
             prob = poisson.pmf(i, homeXG) * poisson.pmf(j, awayXG)
@@ -44,26 +75,26 @@ def error(par):
             else:
                 draw_sum += prob
 
-            if i + j > tg_line:
-                overs_sum += prob
-            elif i + j < tg_line:
-                unders_sum += prob
-            else:
-                exact_line += prob
+            for line, totals in tg_line_totals.items():
+                if i + j > line:
+                    totals['overs_sum'] += prob
+                elif i + j < line:
+                    totals['unders_sum'] += prob
+                else:
+                    totals['exact_line_sum'] += prob
 
-    print(f"Overs sum {overs_sum}")
-    print(f"Unders sum {unders_sum}")
-    print(f"Exact prob {exact_line}")
+    overs_sum = unders_sum = 0
+    print(tg_line_totals)
 
-    overs_odds = (1 - exact_line) / overs_sum
-    unders_odds = (1 - exact_line) / unders_sum
+    for line, totals in tg_line_totals.items():
+        overs_sum += totals['overs_sum'] / (1 - totals['exact_line_sum'])
+        unders_sum += totals['unders_sum'] / (1 - totals['exact_line_sum'])
 
-    print(f"Overs odds {overs_odds}")
-    print(f"Unders odds {unders_odds}")
-    overs_fp = 1 / overs_odds
-    unders_fp = 1 / unders_odds
-    print(f"Overs fair probability {overs_fp}")
-    print(f"Unders fair probability {unders_fp}")
+    overs_sum /= len(tg_line_totals)
+    unders_sum /= len(tg_line_totals)
+
+    print(f"Overs fair probability {overs_sum}")
+    print(f"Unders fair probability {unders_sum}")
     print(home_sum)
     print(away_sum)
     print(draw_sum)
@@ -71,8 +102,8 @@ def error(par):
     return ((home_sum - HOME_FAIR_PROBABILITY)**2 +
             (away_sum - AWAY_FAIR_PROBABILITY)**2 +
             (draw_sum - DRAW_FAIR_PROBABILITY)**2 +
-            (overs_fp - OVER_FAIR_PROBABILITY)**2 +
-            (unders_fp - UNDER_FAIR_PROBABILITY)**2)
+            (overs_sum - OVER_FAIR_PROBABILITY)**2 +
+            (unders_sum - UNDER_FAIR_PROBABILITY)**2)
 
 
 # Use minimize function from scipy.optimize to find the optimal parameters
