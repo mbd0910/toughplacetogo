@@ -46,28 +46,27 @@ def find_nearest_tg_lines(value):
     else:
         raise Exception(f"Unsupported fractional suffix in {value}")
 
+
 def error(par):
-    homeXG = np.exp(par[0])
-    awayXG = np.exp(par[1])
+    home_xg = np.exp(par[0])
+    away_xg = np.exp(par[1])
 
     home_sum = away_sum = draw_sum = 0
     nearest_tg_lines = find_nearest_tg_lines(tg_line)
     tg_line_totals = {
         nearest_tg_lines[0]: {
             'overs_sum': 0,
-            'unders_sum': 0,
             'exact_line_sum': 0
         },
         nearest_tg_lines[1]: {
             'overs_sum': 0,
-            'unders_sum': 0,
             'exact_line_sum': 0
         }
     }
 
     for i in range(16):
         for j in range(16):
-            prob = poisson.pmf(i, homeXG) * poisson.pmf(j, awayXG)
+            prob = poisson.pmf(i, home_xg) * poisson.pmf(j, away_xg)
             if i > j:
                 home_sum += prob
             elif i < j:
@@ -78,20 +77,17 @@ def error(par):
             for line, totals in tg_line_totals.items():
                 if i + j > line:
                     totals['overs_sum'] += prob
-                elif i + j < line:
-                    totals['unders_sum'] += prob
-                else:
+                elif i + j == line:
                     totals['exact_line_sum'] += prob
 
-    overs_sum = unders_sum = 0
+    overs_sum = 0
     print(tg_line_totals)
 
     for line, totals in tg_line_totals.items():
         overs_sum += totals['overs_sum'] / (1 - totals['exact_line_sum'])
-        unders_sum += totals['unders_sum'] / (1 - totals['exact_line_sum'])
 
     overs_sum /= len(tg_line_totals)
-    unders_sum /= len(tg_line_totals)
+    unders_sum = 1 - overs_sum
 
     print(f"Overs fair probability {overs_sum}")
     print(f"Unders fair probability {unders_sum}")
