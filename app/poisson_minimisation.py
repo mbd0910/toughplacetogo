@@ -36,15 +36,27 @@ def find_nearest_tg_lines(value):
 
     # Check if the fractional part is .25 or .75
     if fractional == 0.0:
-        return integral, integral
+        return {'exceed': integral, 'push': integral, 'function': half_or_whole_line}
     elif fractional == 0.25:
-        return integral, integral + 0.5
+        return {'push': integral, 'exceed': integral + 0.5, 'function': quarter_line_half_loss}
     elif fractional == 0.5:
-        return integral + 0.5, integral + 0.5
+        return {'exceed': integral + 0.5, 'push': integral + 0.5, 'function': half_or_whole_line}
     elif fractional == 0.75:
-        return integral + 0.5, integral + 1.0
+        return {'exceed': integral + 0.5, 'push': integral + 1.0, 'function': quarter_line_half_win}
     else:
         raise Exception(f"Unsupported fractional suffix in {value}")
+
+
+def quarter_line_half_loss(exceed_probability, push_probability):
+    return exceed_probability / (1 - (push_probability/2))
+
+
+def quarter_line_half_win(exceed_probability, push_probability):
+    return (exceed_probability - (push_probability/2)) / (1 - (push_probability/2))
+
+
+def half_or_whole_line(exceed_probability, push_probability):
+    return exceed_probability / (1 - push_probability)
 
 
 def error(par):
@@ -53,16 +65,10 @@ def error(par):
 
     home_sum = away_sum = draw_sum = 0
     nearest_tg_lines = find_nearest_tg_lines(tg_line)
-    tg_line_totals = {
-        nearest_tg_lines[0]: {
-            'overs_sum': 0,
-            'exact_line_sum': 0
-        },
-        nearest_tg_lines[1]: {
-            'overs_sum': 0,
-            'exact_line_sum': 0
-        }
-    }
+    push_line = nearest_tg_lines['push']
+    exceed_line = nearest_tg_lines['exceed']
+    function = nearest_tg_lines['function']
+    exceed_sum = push_sum = 0
 
     for i in range(16):
         for j in range(16):
@@ -74,21 +80,17 @@ def error(par):
             else:
                 draw_sum += prob
 
-            for line, totals in tg_line_totals.items():
-                if i + j > line:
-                    totals['overs_sum'] += prob
-                elif i + j == line:
-                    totals['exact_line_sum'] += prob
+            if i + j > exceed_line:
+                exceed_sum += prob
 
-    overs_sum = 0
-    print(tg_line_totals)
+            if i + j == push_line:
+                push_sum += prob
 
-    for line, totals in tg_line_totals.items():
-        overs_sum += totals['overs_sum'] / (1 - totals['exact_line_sum'])
-
-    overs_sum /= len(tg_line_totals)
+    overs_sum = function(exceed_sum, push_sum)
     unders_sum = 1 - overs_sum
 
+    print(f"Exceed line is {exceed_line}")
+    print(f"Push line is {push_line}")
     print(f"Overs fair probability {overs_sum}")
     print(f"Unders fair probability {unders_sum}")
     print(home_sum)
