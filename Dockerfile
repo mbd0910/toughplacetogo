@@ -17,6 +17,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # For saving files
 RUN mkdir -p /data
 
+# For Betfair login
+RUN mkdir -p /betfair
+
 # Copy the rest of the application
 COPY . .
 

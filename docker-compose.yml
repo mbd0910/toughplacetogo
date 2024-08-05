@@ -17,6 +17,9 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: db
+      BETFAIR_USERNAME: ${BETFAIR_USERNAME}
+      BETFAIR_PASSWORD: ${BETFAIR_PASSWORD}
+      BETFAIR_APPLICATION_KEY: ${BETFAIR_APPLICATION_KEY}
     depends_on:
       - db
     ports:
@@ -24,6 +27,7 @@ services:
     volumes:
       - .:/app
       - /Users/michael/Documents/Football:/data
+      - /Users/michael/Documents/Betfair:/betfair
 
 volumes:
   postgres_data:
