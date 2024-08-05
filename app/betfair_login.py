@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 
@@ -15,8 +16,10 @@ payload = {
 }
 
 headers = {
-    'X-Application' : os.getenv('BETFAIR_APPLICATION_KEY')
+    'X-Application' : os.getenv('BETFAIR_APPLICATION_KEY'),
 }
+
+url_prefix = 'https://api.betfair.com/exchange/betting/rest/v1.0/'
 
 # Perform the login request
 try:
@@ -26,9 +29,23 @@ try:
     if response.status_code == 200:
         # Assuming successful login, print the session token
         session_token = response.json().get('sessionToken')
+        headers['X-Authentication'] = session_token
+        headers['content-type'] = 'application/json'
         print(f"Login successful! Session Token: {session_token}")
+        print(headers)
+
+        filter = '{"filter":{ }}'
+
+        list_event_types_endpoint = url_prefix + 'listEventTypes/'
+
+        response = requests.post(list_event_types_endpoint, data=filter, headers=headers)
+
+        print(json.dumps(json.loads(response.text), indent=3))
+
     else:
         print(f"Login failed with status code: {response.status_code}")
         print(f"Response: {response.text}")
 except requests.exceptions.RequestException as e:
     print(f"An error occurred: {e}")
+
+
