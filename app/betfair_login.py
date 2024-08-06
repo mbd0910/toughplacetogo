@@ -34,12 +34,23 @@ try:
         print(f"Login successful! Session Token: {session_token}")
         print(headers)
 
-        filter = '{"filter":{ }}'
+        football_and_friday_filter = '{"filter":{ "eventTypeIds": ["1"], "marketStartTime": {"from": "2024-08-05T00:00:00Z","to": "2024-08-05T23:59:59Z"}}}'
+        list_events_endpoint = url_prefix + 'listEvents/'
 
-        list_event_types_endpoint = url_prefix + 'listEventTypes/'
+        response = requests.post(list_events_endpoint, data=football_and_friday_filter, headers=headers)
+        print(json.dumps(json.loads(response.text), indent=3))
 
-        response = requests.post(list_event_types_endpoint, data=filter, headers=headers)
+        # individual_filter = '{"filter":{ "eventIds": ["33464179"], "marketBettingTypes": ["ASIAN_HANDICAP_DOUBLE_LINE"]}, "maxResults": "200", "marketProjection": ["RUNNER_DESCRIPTION", "RUNNER_METADATA"]}'
+        individual_filter = '{"filter":{ "eventIds": ["33464179"], "maxResults": "200", "marketProjection": ["RUNNER_DESCRIPTION", "RUNNER_METADATA"]}'
+        list_market_catalogue_endpoint = url_prefix + 'listMarketCatalogue/'
 
+        response = requests.post(list_market_catalogue_endpoint, data=individual_filter, headers=headers)
+        print(json.dumps(json.loads(response.text), indent=3))
+
+        market_filter = '{"marketIds":["1.231381167"],"priceProjection":{"priceData":["EX_BEST_OFFERS"], "keyLineDescription": true}}'
+        list_market_book_endpoint = url_prefix + 'listMarketBook/'
+
+        response = requests.post(list_market_book_endpoint, data=market_filter, headers=headers)
         print(json.dumps(json.loads(response.text), indent=3))
 
     else:
