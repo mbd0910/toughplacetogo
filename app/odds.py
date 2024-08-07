@@ -6,3 +6,6 @@ class Odds:
 
     def implied_probability(self):
         return 1 / self.price
+
+    def __str__(self):
+        return f"Odds: {self.price}"
