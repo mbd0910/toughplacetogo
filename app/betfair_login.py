@@ -89,56 +89,71 @@ def main():
             json_response = sorted(json.loads(response.text), key=lambda x: x['event']['openDate'])
             print(json.dumps(json_response, indent=3))
             output = "\n".join([f"{event['event']['id']},{event['event']['name']}" for event in json_response])
-
             print(output)
 
-            LEEDS_PORTSMOUTH_ID = 33375220
-            # TODO: get these from the game name, split on the 'v'
-            home_team_name = 'Leeds'
-            away_team_name = 'Portsmouth'
+            for event in json_response:
+                event_name = event['event']['name']
 
-            PRESTON_SHEFF_UTD = 33375226
-            home_team_name = 'Preston'
-            away_team_name = 'Sheff Utd'
-
-            # response = requests.post(list_competitions_endpoint, data=football_and_weekend_filter, headers=headers)
-            # print(json.dumps(json.loads(response.text), indent=3))
-
-            markets_for_a_game_filter = json.dumps({
-                "filter": {
-                    "eventIds": [PRESTON_SHEFF_UTD],
-                    #"marketBettingTypes": ["ASIAN_HANDICAP_DOUBLE_LINE"],
-                },
-                "maxResults": 200,
-                "marketProjection": [
-                    "RUNNER_DESCRIPTION",
-                    "RUNNER_METADATA"
-                ]
-            })
-            list_market_catalogue_endpoint = url_prefix + 'listMarketCatalogue/'
-
-            response = requests.post(list_market_catalogue_endpoint, data=markets_for_a_game_filter, headers=headers)
-            #print(json.dumps(json.loads(response.text), indent=3))
-            json_response = json.loads(response.text)
-            markets = "\n".join([f"{market[MARKET_ID_KEY]},{market[MARKET_NAME_KEY]}" for market in json_response])
-            print(markets)
-
-            for market in json_response:
-                market_name = market[MARKET_NAME_KEY]
-                if market_name == MATCH_ODDS_MARKET_NAME:
-                    match_odds = get_match_odds(market, home_team_name, away_team_name)
-                    print(match_odds)
-                elif market_name == ASIAN_HANDICAP_MARKET_NAME:
-                    asian_handicap_odds = get_asian_handicap_odds(market)
-                    print(asian_handicap_odds)
-                elif market_name == GOAL_LINE_MARKET_NAME:
-                    total_goals_odds = get_total_goals_odds(market)
-                    print(total_goals_odds)
+                if (event_name != 'English Championship' and
+                        event_name != 'English League 1' and
+                        event_name != 'English League 2'):
+                    process_event(event)
         else:
             print(f"Login failed with status code: {response.status_code}")
             print(f"Response: {response.text}")
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
+
+
+def process_event(event):
+    event_id = event['event']['id']
+    event_name = event['event']['name']
+
+    home_team_name, away_team_name = event_name.split(' v ')
+
+    # LEEDS_PORTSMOUTH_ID = 33375220
+    # # TODO: get these from the game name, split on the 'v'
+    # home_team_name = 'Leeds'
+    # away_team_name = 'Portsmouth'
+    #
+    # PRESTON_SHEFF_UTD = 33375226
+    # home_team_name = 'Preston'
+    # away_team_name = 'Sheff Utd'
+
+    # response = requests.post(list_competitions_endpoint, data=football_and_weekend_filter, headers=headers)
+    # print(json.dumps(json.loads(response.text), indent=3))
+
+    markets_for_a_game_filter = json.dumps({
+        "filter": {
+            "eventIds": [event_id],
+            #"marketBettingTypes": ["ASIAN_HANDICAP_DOUBLE_LINE"],
+        },
+        "maxResults": 200,
+        "marketProjection": [
+            "RUNNER_DESCRIPTION",
+            "RUNNER_METADATA"
+        ]
+    })
+    list_market_catalogue_endpoint = url_prefix + 'listMarketCatalogue/'
+
+    response = requests.post(list_market_catalogue_endpoint, data=markets_for_a_game_filter, headers=headers)
+    #print(json.dumps(json.loads(response.text), indent=3))
+    json_response = json.loads(response.text)
+    markets = "\n".join([f"{market[MARKET_ID_KEY]},{market[MARKET_NAME_KEY]}" for market in json_response])
+    #print(markets)
+    print(f"{event_id}: {event_name}")
+
+    for market in json_response:
+        market_name = market[MARKET_NAME_KEY]
+        if market_name == MATCH_ODDS_MARKET_NAME:
+            match_odds = get_match_odds(market, home_team_name, away_team_name)
+            print(match_odds)
+        elif market_name == ASIAN_HANDICAP_MARKET_NAME:
+            asian_handicap_odds = get_asian_handicap_odds(market)
+            print(asian_handicap_odds)
+        elif market_name == GOAL_LINE_MARKET_NAME:
+            total_goals_odds = get_total_goals_odds(market)
+            print(total_goals_odds)
 
 
 def get_match_odds(market, home_team_name, away_team_name):
