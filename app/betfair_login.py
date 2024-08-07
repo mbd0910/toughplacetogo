@@ -97,12 +97,16 @@ def main():
             home_team_name = 'Leeds'
             away_team_name = 'Portsmouth'
 
+            PRESTON_SHEFF_UTD = 33375226
+            home_team_name = 'Preston'
+            away_team_name = 'Sheff Utd'
+
             # response = requests.post(list_competitions_endpoint, data=football_and_weekend_filter, headers=headers)
             # print(json.dumps(json.loads(response.text), indent=3))
 
             markets_for_a_game_filter = json.dumps({
                 "filter": {
-                    "eventIds": [LEEDS_PORTSMOUTH_ID],
+                    "eventIds": [PRESTON_SHEFF_UTD],
                     #"marketBettingTypes": ["ASIAN_HANDICAP_DOUBLE_LINE"],
                 },
                 "maxResults": 200,
@@ -174,8 +178,8 @@ def get_asian_handicap_odds(market):
     asian_handicap_odds_result = AsianHandicapOdds()
     # print(json.dumps(asian_handicap_odds, indent=3))
 
-    # TODO: huge assumption that the primary handicap will be the first one in the keyLineDescription - will
-    # be from the home team's point of view. This needs checking with an away favourite
+    # Assumption that the primary handicap will be the first one in the keyLineDescription - will
+    # be from the home team's point of view.
     home_primary_line_handicap = asian_handicap_odds[0][KEY_LINE_DESCRIPTION_KEY][KEY_LINE_KEY][0]
     home_primary_line_handicap_value = home_primary_line_handicap['handicap']
 
