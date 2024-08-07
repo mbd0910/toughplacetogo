@@ -39,6 +39,8 @@ MARKET_NAME_KEY = 'marketName'
 RUNNERS_KEY = 'runners'
 RUNNER_NAME_KEY = 'runnerName'
 SELECTION_ID_KEY = 'selectionId'
+KEY_LINE_DESCRIPTION_KEY = 'keyLineDescription'
+KEY_LINE_KEY = 'keyLine'
 
 ASIAN_HANDICAP_MARKET_NAME = 'Asian Handicap'
 GOAL_LINE_MARKET_NAME = 'Goal Lines'
@@ -112,7 +114,7 @@ def main():
             list_market_catalogue_endpoint = url_prefix + 'listMarketCatalogue/'
 
             response = requests.post(list_market_catalogue_endpoint, data=markets_for_a_game_filter, headers=headers)
-            print(json.dumps(json.loads(response.text), indent=3))
+            #print(json.dumps(json.loads(response.text), indent=3))
             json_response = json.loads(response.text)
             markets = "\n".join([f"{market[MARKET_ID_KEY]},{market[MARKET_NAME_KEY]}" for market in json_response])
             print(markets)
@@ -170,13 +172,14 @@ def get_asian_handicap_odds(market):
     asian_handicap_odds = market_book(asian_handicap_market_id)
 
     asian_handicap_odds_result = AsianHandicapOdds()
-    print(json.dumps(asian_handicap_odds, indent=3))
-    # This is a bit of an assumption that the primary handicap will be the first one in the keyLineDescription - will
+    # print(json.dumps(asian_handicap_odds, indent=3))
+
+    # TODO: huge assumption that the primary handicap will be the first one in the keyLineDescription - will
     # be from the home team's point of view. This needs checking with an away favourite
-    home_primary_line_handicap = asian_handicap_odds[0]['keyLineDescription']['keyLine'][0]
+    home_primary_line_handicap = asian_handicap_odds[0][KEY_LINE_DESCRIPTION_KEY][KEY_LINE_KEY][0]
     home_primary_line_handicap_value = home_primary_line_handicap['handicap']
 
-    away_primary_line_handicap = asian_handicap_odds[0]['keyLineDescription']['keyLine'][1]
+    away_primary_line_handicap = asian_handicap_odds[0][KEY_LINE_DESCRIPTION_KEY][KEY_LINE_KEY][1]
     away_primary_line_handicap_value = away_primary_line_handicap['handicap']
 
     asian_handicap_odds_result.home_line = home_primary_line_handicap_value
@@ -203,7 +206,35 @@ def get_asian_handicap_odds(market):
 
 
 def get_total_goals_odds(market):
-    total_goals_odds = TotalGoalsOdds(1.0, Odds(2.0), Odds(2.05))
+    total_goals_market_id = market[MARKET_ID_KEY]
+    total_goals_market = market_book(total_goals_market_id)
+    # print(json.dumps(total_goals_market, indent=3))
+    primary_lines = total_goals_market[0][KEY_LINE_DESCRIPTION_KEY][KEY_LINE_KEY]
+
+    total_goals_odds = TotalGoalsOdds()
+
+    for selection in market[RUNNERS_KEY]:
+        for primary_line in primary_lines:
+            if (selection['selectionId'] == primary_line['selectionId'] and
+                    selection['handicap'] == primary_line['handicap']):
+                primary_line[RUNNER_NAME_KEY] = selection[RUNNER_NAME_KEY]
+                break
+
+    for primary_line in primary_lines:
+        for selection_book in total_goals_market[0][RUNNERS_KEY]:
+            if (selection_book['selectionId'] == primary_line['selectionId'] and
+                    selection_book['handicap'] == primary_line['handicap']):
+                total_goals_odds.line = primary_line['handicap']
+
+                best_back = selection_book['ex']['availableToBack'][0]['price']
+                best_lay = selection_book['ex']['availableToLay'][0]['price']
+                best_price = Odds((best_back + best_lay) / 2)
+
+                if primary_line[RUNNER_NAME_KEY] == 'Under':
+                    total_goals_odds.under_odds = best_price
+                else:
+                    total_goals_odds.over_odds = best_price
+                break
 
     return total_goals_odds
 
