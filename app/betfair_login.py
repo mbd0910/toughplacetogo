@@ -4,6 +4,8 @@ import os
 import requests
 from match_odds import MatchOdds
 from odds import Odds
+from asian_handicap_odds import AsianHandicapOdds
+from total_goals_odds import TotalGoalsOdds
 
 # Paths to your .crt and .key files
 cert_file = '/betfair/client-2048.crt'  # Your .crt file
@@ -99,7 +101,7 @@ def main():
             markets_for_a_game_filter = json.dumps({
                 "filter": {
                     "eventIds": [LEEDS_PORTSMOUTH_ID],
-                    # "marketBettingTypes": ["ASIAN_HANDICAP_DOUBLE_LINE"],
+                    #"marketBettingTypes": ["ASIAN_HANDICAP_DOUBLE_LINE"],
                 },
                 "maxResults": 200,
                 "marketProjection": [
@@ -116,10 +118,16 @@ def main():
             print(markets)
 
             for market in json_response:
-                if market[MARKET_NAME_KEY] == MATCH_ODDS_MARKET_NAME:
+                market_name = market[MARKET_NAME_KEY]
+                if market_name == MATCH_ODDS_MARKET_NAME:
                     match_odds = get_match_odds(market, home_team_name, away_team_name)
                     print(match_odds)
-
+                elif market_name == ASIAN_HANDICAP_MARKET_NAME:
+                    asian_handicap_odds = get_asian_handicap_odds(market)
+                    print(asian_handicap_odds)
+                elif market_name == GOAL_LINE_MARKET_NAME:
+                    total_goals_odds = get_total_goals_odds(market)
+                    print(total_goals_odds)
         else:
             print(f"Login failed with status code: {response.status_code}")
             print(f"Response: {response.text}")
@@ -134,20 +142,10 @@ def get_match_odds(market, home_team_name, away_team_name):
     for selection in market[RUNNERS_KEY]:
         selections_by_id[selection[SELECTION_ID_KEY]] = selection
 
-    book_filter = json.dumps({
-        "marketIds": [match_odds_market_id],
-        "priceProjection": {
-            "priceData": ["EX_BEST_OFFERS"],
-            "keyLineDescription": True
-        }
-    })
-    list_market_book_endpoint = url_prefix + 'listMarketBook/'
-
-    match_odds_response = requests.post(list_market_book_endpoint, data=book_filter, headers=headers)
-    match_odds = json.loads(match_odds_response.text)
+    match_odds = market_book(match_odds_market_id)
     match_odds_result = MatchOdds()
 
-    print(json.dumps(match_odds, indent=3))
+    # print(json.dumps(match_odds, indent=3))
 
     for selection_book in match_odds[0][RUNNERS_KEY]:
         selection_id = selection_book[SELECTION_ID_KEY]
@@ -166,6 +164,62 @@ def get_match_odds(market, home_team_name, away_team_name):
 
     return match_odds_result
 
+
+def get_asian_handicap_odds(market):
+    asian_handicap_market_id = market[MARKET_ID_KEY]
+    asian_handicap_odds = market_book(asian_handicap_market_id)
+
+    asian_handicap_odds_result = AsianHandicapOdds()
+    print(json.dumps(asian_handicap_odds, indent=3))
+    # This is a bit of an assumption that the primary handicap will be the first one in the keyLineDescription - will
+    # be from the home team's point of view. This needs checking with an away favourite
+    home_primary_line_handicap = asian_handicap_odds[0]['keyLineDescription']['keyLine'][0]
+    home_primary_line_handicap_value = home_primary_line_handicap['handicap']
+
+    away_primary_line_handicap = asian_handicap_odds[0]['keyLineDescription']['keyLine'][1]
+    away_primary_line_handicap_value = away_primary_line_handicap['handicap']
+
+    asian_handicap_odds_result.home_line = home_primary_line_handicap_value
+    asian_handicap_odds_result.away_line = away_primary_line_handicap_value
+
+    for selection_book in asian_handicap_odds[0][RUNNERS_KEY]:
+        # TODO: obvious duplication that can be fixed here but no need for now
+        if (selection_book['handicap'] == home_primary_line_handicap_value and
+                selection_book['selectionId'] == home_primary_line_handicap['selectionId']):
+            best_back = selection_book['ex']['availableToBack'][0]['price']
+            best_lay = selection_book['ex']['availableToLay'][0]['price']
+            best_price = Odds((best_back + best_lay) / 2)
+
+            asian_handicap_odds_result.home_odds = best_price
+        elif (selection_book['handicap'] == away_primary_line_handicap_value and
+                selection_book['selectionId'] == away_primary_line_handicap['selectionId']):
+            best_back = selection_book['ex']['availableToBack'][0]['price']
+            best_lay = selection_book['ex']['availableToLay'][0]['price']
+            best_price = Odds((best_back + best_lay) / 2)
+
+            asian_handicap_odds_result.away_odds = best_price
+
+    return asian_handicap_odds_result
+
+
+def get_total_goals_odds(market):
+    total_goals_odds = TotalGoalsOdds(1.0, Odds(2.0), Odds(2.05))
+
+    return total_goals_odds
+
+
+def market_book(market_id):
+    book_filter = json.dumps({
+        "marketIds": [market_id],
+        "priceProjection": {
+            "priceData": ["EX_BEST_OFFERS"],
+            "keyLineDescription": True
+        }
+    })
+    list_market_book_endpoint = url_prefix + 'listMarketBook/'
+
+    response = requests.post(list_market_book_endpoint, data=book_filter, headers=headers)
+    return json.loads(response.text)
 
 
 main()
