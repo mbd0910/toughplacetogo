@@ -8,6 +8,8 @@ from asian_handicap_odds import AsianHandicapOdds
 from total_goals_odds import TotalGoalsOdds
 from poisson_minimisation import calculate_scoreline_distribution, find_expected_goals
 from calculate_expected_team_points import calculate_expected_home_team_points, calculate_expected_away_team_points
+from efl_game_prediction import EFLGamePrediction
+from efl_gameweek_prediction import EFLGameweekPrediction
 
 # Paths to your .crt and .key files
 cert_file = '/betfair/client-2048.crt'  # Your .crt file
@@ -99,7 +101,12 @@ def main():
                 if (event_name != 'English Championship' and
                         event_name != 'English League 1' and
                         event_name != 'English League 2'):
-                    process_event(event)
+                    efl_game_prediction = process_event(event)
+
+                    print(event_name)
+                    print(f"Home expected points: {efl_game_prediction.expected_home_points}")
+                    print(f"Away expected points: {efl_game_prediction.expected_away_points}")
+
         else:
             print(f"Login failed with status code: {response.status_code}")
             print(f"Response: {response.text}")
@@ -112,15 +119,6 @@ def process_event(event):
     event_name = event['event']['name']
 
     home_team_name, away_team_name = event_name.split(' v ')
-
-    # LEEDS_PORTSMOUTH_ID = 33375220
-    # # TODO: get these from the game name, split on the 'v'
-    # home_team_name = 'Leeds'
-    # away_team_name = 'Portsmouth'
-    #
-    # PRESTON_SHEFF_UTD = 33375226
-    # home_team_name = 'Preston'
-    # away_team_name = 'Sheff Utd'
 
     # response = requests.post(list_competitions_endpoint, data=football_and_weekend_filter, headers=headers)
     # print(json.dumps(json.loads(response.text), indent=3))
@@ -166,9 +164,19 @@ def process_event(event):
         expected_home_team_points = calculate_expected_home_team_points(scoreline_probability_distribution)
         expected_away_team_points = calculate_expected_away_team_points(scoreline_probability_distribution)
 
-        print(event_name)
-        print(f"{home_team_name} expected points: {expected_home_team_points}")
-        print(f"{away_team_name} expected points: {expected_away_team_points}")
+        return EFLGamePrediction(
+            event_name=event_name,
+            match_odds=match_odds,
+            asian_handicap_odds=asian_handicap_odds,
+            total_goals_odds=total_goals_odds,
+            expected_goals=expected_goals,
+            scoreline_probability_distribution=scoreline_probability_distribution,
+            expected_home_points=expected_home_team_points,
+            expected_away_points=expected_away_team_points
+        )
+
+    else:
+        return None
 
 
 def get_match_odds(market, home_team_name, away_team_name):
