@@ -6,35 +6,7 @@ from match_odds import MatchOdds
 from odds import Odds
 from total_goals_odds import TotalGoalsOdds
 from asian_handicap_odds import AsianHandicapOdds
-
-match_odds = MatchOdds(
-    home=Odds(1.15),
-    draw=Odds(10),
-    away=Odds(25)
-)
-
-home_fair_probability = match_odds.home_fair_probability()
-draw_fair_probability = match_odds.draw_fair_probability()
-away_fair_probability = match_odds.away_probability()
-
-total_goals_odds = TotalGoalsOdds(
-    line=3.25,
-    under=Odds(2.01),
-    over=Odds(1.85)
-)
-
-over_fair_probability = total_goals_odds.over_fair_probability()
-under_fair_probability = total_goals_odds.under_fair_probability()
-
-asian_handicap_odds = AsianHandicapOdds(
-    home_line=-2.25,
-    home_odds=Odds(1.98),
-    away_line=2.25,
-    away_odds=Odds(1.94)
-)
-
-handicap_home_fair_probability = asian_handicap_odds.home_fair_probability()
-handicap_away_fair_probability = asian_handicap_odds.away_fair_probability()
+from functools import partial
 
 
 def quarter_line_half_loss(exceed_probability, push_probability):
@@ -94,21 +66,25 @@ def hcp_line_details(line):
 # exit(0)
 
 
-def error(par):
+def error(par,
+          home_fair_probability,
+          draw_fair_probability,
+          away_fair_probability,
+          over_fair_probability,
+          under_fair_probability,
+          tg_push_line,
+          tg_exceed_line,
+          tg_function,
+          handicap_home_fair_probability,
+          handicap_away_fair_probability,
+          hcp_push_line,
+          hcp_exceed_line,
+          hcp_function):
     home_xg = np.exp(par[0])
     away_xg = np.exp(par[1])
 
     home_sum = away_sum = draw_sum = 0
-    tg_line_metadata = tg_line_details(total_goals_odds.line)
-    tg_push_line = tg_line_metadata['push']
-    tg_exceed_line = tg_line_metadata['exceed']
-    tg_function = tg_line_metadata['function']
     tg_exceed_sum = tg_push_sum = 0
-
-    hcp_line_metadata = hcp_line_details(asian_handicap_odds.home_line)
-    hcp_push_line = hcp_line_metadata['push']
-    hcp_exceed_line = hcp_line_metadata['exceed']
-    hcp_function = hcp_line_metadata['function']
     hcp_exceed_sum = hcp_push_sum = 0
 
     for i in range(16):
@@ -139,15 +115,15 @@ def error(par):
     hcp_home_sum = hcp_function(hcp_exceed_sum, hcp_push_sum)
     hcp_away_sum = 1 - hcp_home_sum
 
-    print(f"Exceed line is {tg_exceed_line}")
-    print(f"Push line is {tg_push_line}")
-    print(f"Overs fair probability {overs_sum}")
-    print(f"Unders fair probability {unders_sum}")
-    print(f"HCP home fair probability {hcp_home_sum}")
-    print(f"HCP away fair probability {hcp_away_sum}")
-    print(home_sum)
-    print(away_sum)
-    print(draw_sum)
+    # print(f"Exceed line is {tg_exceed_line}")
+    # print(f"Push line is {tg_push_line}")
+    # print(f"Overs fair probability {overs_sum}")
+    # print(f"Unders fair probability {unders_sum}")
+    # print(f"HCP home fair probability {hcp_home_sum}")
+    # print(f"HCP away fair probability {hcp_away_sum}")
+    # print(home_sum)
+    # print(away_sum)
+    # print(draw_sum)
 
     return (
             (home_sum - home_fair_probability)**2 +
@@ -159,10 +135,79 @@ def error(par):
             (hcp_away_sum - handicap_away_fair_probability)**2)
 
 
-# Use minimize function from scipy.optimize to find the optimal parameters
-result = minimize(error, [0, 0], method='Nelder-Mead')
-goals = np.exp(result.x)
+def find_expected_goals(
+        match_odds: MatchOdds,
+        asian_handicap_odds: AsianHandicapOdds,
+        total_goals_odds: TotalGoalsOdds):
+    home_fair_probability = match_odds.home_fair_probability()
+    draw_fair_probability = match_odds.draw_fair_probability()
+    away_fair_probability = match_odds.away_probability()
+    over_fair_probability = total_goals_odds.over_fair_probability()
+    under_fair_probability = total_goals_odds.under_fair_probability()
+    handicap_home_fair_probability = asian_handicap_odds.home_fair_probability()
+    handicap_away_fair_probability = asian_handicap_odds.away_fair_probability()
 
-print(f"Home: {goals[0]}, Away: {goals[1]}")
-print(f"TG: {goals[0] + goals[1]}")
-print(f"HCP: {goals[0] - goals[1]}")
+    tg_line_metadata = tg_line_details(total_goals_odds.line)
+    tg_push_line = tg_line_metadata['push']
+    tg_exceed_line = tg_line_metadata['exceed']
+    tg_function = tg_line_metadata['function']
+
+    hcp_line_metadata = hcp_line_details(asian_handicap_odds.home_line)
+    hcp_push_line = hcp_line_metadata['push']
+    hcp_exceed_line = hcp_line_metadata['exceed']
+    hcp_function = hcp_line_metadata['function']
+
+    error_with_params = partial(
+        error,
+        home_fair_probability=home_fair_probability,
+        draw_fair_probability=draw_fair_probability,
+        away_fair_probability=away_fair_probability,
+        over_fair_probability=over_fair_probability,
+        under_fair_probability=under_fair_probability,
+        tg_push_line=tg_push_line,
+        tg_exceed_line=tg_exceed_line,
+        tg_function=tg_function,
+        handicap_home_fair_probability=handicap_home_fair_probability,
+        handicap_away_fair_probability=handicap_away_fair_probability,
+        hcp_push_line=hcp_push_line,
+        hcp_exceed_line=hcp_exceed_line,
+        hcp_function=hcp_function
+    )
+
+    initial_home_goals_estimate = (total_goals_odds.line - asian_handicap_odds.home_line) / 2
+    initial_away_goals_estimate = total_goals_odds.line - initial_home_goals_estimate
+    initial_guess = np.log([initial_home_goals_estimate, initial_away_goals_estimate])
+
+    # Use minimize function from scipy.optimize to find the optimal parameters
+    result = minimize(
+        fun=error_with_params,
+        x0=initial_guess,
+        method='Nelder-Mead'
+    )
+    goals = np.exp(result.x)
+
+    print(f"Home: {goals[0]}, Away: {goals[1]}")
+    print(f"TG: {goals[0] + goals[1]}")
+    print(f"HCP: {goals[0] - goals[1]}")
+
+
+match_odds = MatchOdds(
+    home=Odds(1.15),
+    draw=Odds(10),
+    away=Odds(25)
+)
+
+total_goals_odds = TotalGoalsOdds(
+    line=3.25,
+    under=Odds(2.01),
+    over=Odds(1.85)
+)
+
+asian_handicap_odds = AsianHandicapOdds(
+    home_line=-2.25,
+    home_odds=Odds(1.98),
+    away_line=2.25,
+    away_odds=Odds(1.94)
+)
+
+find_expected_goals(match_odds, asian_handicap_odds, total_goals_odds)
