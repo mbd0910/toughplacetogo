@@ -23,8 +23,8 @@ def calculate_expected_goals(asian_handicap_odds: AsianHandicapOdds, total_goals
     print(implied_home_handicap_probability)
     print(implied_away_handicap_probability)
 
-    implied_unders_probability = total_goals_odds.under_odds.implied_probability()
-    implied_overs_probability = total_goals_odds.over_odds.implied_probability()
+    implied_unders_probability = total_goals_odds.under.implied_probability()
+    implied_overs_probability = total_goals_odds.over.implied_probability()
 
     print(implied_unders_probability)
     print(implied_overs_probability)

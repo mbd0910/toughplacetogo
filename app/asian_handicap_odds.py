@@ -52,3 +52,12 @@ class AsianHandicapOdds:
         away_line_str = f"Away Line: {self._away_line}" if self._away_line is not None else "Away Line: None"
         away_odds_str = f"Away Odds: {self._away_odds}" if self._away_odds else "Away Odds: None"
         return f"AsianHandicapOdds({home_line_str}, {home_odds_str}, {away_line_str}, {away_odds_str})"
+
+    def total_probability(self):
+        return self.home_odds.implied_probability() + self.away_odds.implied_probability()
+
+    def home_fair_probability(self):
+        return self.home_odds.implied_probability() / self.total_probability()
+
+    def away_fair_probability(self):
+        return self.away_odds.implied_probability() / self.total_probability()

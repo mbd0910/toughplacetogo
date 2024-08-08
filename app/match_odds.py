@@ -36,3 +36,17 @@ class MatchOdds:
         draw_str = str(self.draw) if self.draw else "None"
         away_str = str(self.away) if self.away else "None"
         return f"MatchOdds(Home: {home_str}, Draw: {draw_str}, Away: {away_str})"
+
+    def total_probability(self):
+        return self.home.implied_probability() + self.draw.implied_probability() + self.away.implied_probability()
+
+    def home_fair_probability(self):
+        return self.home.implied_probability() / self.total_probability()
+
+    def draw_fair_probability(self):
+        return self.draw.implied_probability() / self.total_probability()
+
+    def away_probability(self):
+        return self.away.implied_probability() / self.total_probability()
+
+

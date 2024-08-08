@@ -2,41 +2,39 @@ import math
 import numpy as np
 from scipy.optimize import minimize
 from scipy.stats import poisson
+from match_odds import MatchOdds
+from odds import Odds
+from total_goals_odds import TotalGoalsOdds
+from asian_handicap_odds import AsianHandicapOdds
 
-# Define initial odds
-HOME_BOOKIE_ODDS = 1.15
-AWAY_BOOKIE_ODDS = 25
-DRAW_BOOKIE_ODDS = 10
+match_odds = MatchOdds(
+    home=Odds(1.15),
+    draw=Odds(10),
+    away=Odds(25)
+)
 
-# Convert odds to probabilities
-total_sum = 1/HOME_BOOKIE_ODDS + 1/AWAY_BOOKIE_ODDS + 1/DRAW_BOOKIE_ODDS
-HOME_FAIR_PROBABILITY = 1/HOME_BOOKIE_ODDS/total_sum
-AWAY_FAIR_PROBABILITY = 1/AWAY_BOOKIE_ODDS/total_sum
-DRAW_FAIR_PROBABILITY = 1/DRAW_BOOKIE_ODDS/total_sum
+home_fair_probability = match_odds.home_fair_probability()
+draw_fair_probability = match_odds.draw_fair_probability()
+away_fair_probability = match_odds.away_probability()
 
-tg_line = 3.25
-OVER_BOOKIE_ODDS = 1.85
-UNDER_BOOKIE_ODDS = 2.01
-total_sum = 1/OVER_BOOKIE_ODDS + 1/UNDER_BOOKIE_ODDS
-print(f"total sum is {total_sum}")
-OVER_FAIR_PROBABILITY = 1/OVER_BOOKIE_ODDS/total_sum
-UNDER_FAIR_PROBABILITY = 1/UNDER_BOOKIE_ODDS/total_sum
-OVER_FAIR_ODDS = 1/OVER_FAIR_PROBABILITY
-UNDER_FAIR_ODDS = 1/UNDER_FAIR_PROBABILITY
+total_goals_odds = TotalGoalsOdds(
+    line=3.25,
+    under=Odds(2.01),
+    over=Odds(1.85)
+)
 
-print(f"Bookie odds were overs: {OVER_BOOKIE_ODDS}")
-print(f"Bookie odds were unders: {UNDER_BOOKIE_ODDS}")
-print(f"Over is {OVER_FAIR_ODDS}")
-print(f"Under is {UNDER_FAIR_ODDS}")
+over_fair_probability = total_goals_odds.over_fair_probability()
+under_fair_probability = total_goals_odds.under_fair_probability()
 
-hcp_line = -2.25
-HCP_HOME_BOOKIE_ODDS = 1.98
-HCP_AWAY_BOOKIE_ODDS = 1.94
-total_hcp_sum = 1/HOME_BOOKIE_ODDS + 1/AWAY_BOOKIE_ODDS
-HCP_HOME_FAIR_PROBABILITY = 1/HCP_HOME_BOOKIE_ODDS/total_hcp_sum
-HCP_AWAY_FAIR_PROBABILITY = 1/HCP_AWAY_BOOKIE_ODDS/total_hcp_sum
-HCP_HOME_FAIR_ODDS = 1/HCP_HOME_FAIR_PROBABILITY
-HCP_AWAY_FAIR_ODDS = 1/HCP_AWAY_FAIR_PROBABILITY
+asian_handicap_odds = AsianHandicapOdds(
+    home_line=-2.25,
+    home_odds=Odds(1.98),
+    away_line=2.25,
+    away_odds=Odds(1.94)
+)
+
+handicap_home_fair_probability = asian_handicap_odds.home_fair_probability()
+handicap_away_fair_probability = asian_handicap_odds.away_fair_probability()
 
 
 def quarter_line_half_loss(exceed_probability, push_probability):
@@ -101,13 +99,13 @@ def error(par):
     away_xg = np.exp(par[1])
 
     home_sum = away_sum = draw_sum = 0
-    tg_line_metadata = tg_line_details(tg_line)
+    tg_line_metadata = tg_line_details(total_goals_odds.line)
     tg_push_line = tg_line_metadata['push']
     tg_exceed_line = tg_line_metadata['exceed']
     tg_function = tg_line_metadata['function']
     tg_exceed_sum = tg_push_sum = 0
 
-    hcp_line_metadata = hcp_line_details(hcp_line)
+    hcp_line_metadata = hcp_line_details(asian_handicap_odds.home_line)
     hcp_push_line = hcp_line_metadata['push']
     hcp_exceed_line = hcp_line_metadata['exceed']
     hcp_function = hcp_line_metadata['function']
@@ -152,13 +150,13 @@ def error(par):
     print(draw_sum)
 
     return (
-            (home_sum - HOME_FAIR_PROBABILITY)**2 +
-            (away_sum - AWAY_FAIR_PROBABILITY)**2 +
-            (draw_sum - DRAW_FAIR_PROBABILITY)**2 +
-            (overs_sum - OVER_FAIR_PROBABILITY)**2 +
-            (unders_sum - UNDER_FAIR_PROBABILITY)**2 +
-            (hcp_home_sum - HCP_HOME_FAIR_PROBABILITY)**2 +
-            (hcp_away_sum - HCP_AWAY_FAIR_PROBABILITY)**2)
+            (home_sum - home_fair_probability)**2 +
+            (away_sum - away_fair_probability)**2 +
+            (draw_sum - draw_fair_probability)**2 +
+            (overs_sum - over_fair_probability)**2 +
+            (unders_sum - under_fair_probability)**2 +
+            (hcp_home_sum - handicap_home_fair_probability)**2 +
+            (hcp_away_sum - handicap_away_fair_probability)**2)
 
 
 # Use minimize function from scipy.optimize to find the optimal parameters

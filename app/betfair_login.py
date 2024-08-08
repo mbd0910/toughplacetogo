@@ -250,9 +250,9 @@ def get_total_goals_odds(market):
                 best_price = Odds((best_back + best_lay) / 2)
 
                 if primary_line[RUNNER_NAME_KEY] == 'Under':
-                    total_goals_odds.under_odds = best_price
+                    total_goals_odds.under = best_price
                 else:
-                    total_goals_odds.over_odds = best_price
+                    total_goals_odds.over = best_price
                 break
 
     return total_goals_odds
