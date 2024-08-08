@@ -46,7 +46,7 @@ class MatchOdds:
     def draw_fair_probability(self):
         return self.draw.implied_probability() / self.total_probability()
 
-    def away_probability(self):
+    def away_fair_probability(self):
         return self.away.implied_probability() / self.total_probability()
 
 

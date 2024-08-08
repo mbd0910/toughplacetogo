@@ -6,6 +6,8 @@ from match_odds import MatchOdds
 from odds import Odds
 from asian_handicap_odds import AsianHandicapOdds
 from total_goals_odds import TotalGoalsOdds
+from poisson_minimisation import calculate_scoreline_distribution, find_expected_goals
+from calculate_expected_team_points import calculate_expected_home_team_points, calculate_expected_away_team_points
 
 # Paths to your .crt and .key files
 cert_file = '/betfair/client-2048.crt'  # Your .crt file
@@ -143,6 +145,8 @@ def process_event(event):
     #print(markets)
     print(f"{event_id}: {event_name}")
 
+    match_odds = asian_handicap_odds = total_goals_odds = None
+
     for market in json_response:
         market_name = market[MARKET_NAME_KEY]
         if market_name == MATCH_ODDS_MARKET_NAME:
@@ -154,6 +158,17 @@ def process_event(event):
         elif market_name == GOAL_LINE_MARKET_NAME:
             total_goals_odds = get_total_goals_odds(market)
             print(total_goals_odds)
+
+    if match_odds is not None and asian_handicap_odds is not None and total_goals_odds is not None:
+        expected_goals = find_expected_goals(match_odds, asian_handicap_odds, total_goals_odds)
+        scoreline_probability_distribution = calculate_scoreline_distribution(expected_goals)
+
+        expected_home_team_points = calculate_expected_home_team_points(scoreline_probability_distribution)
+        expected_away_team_points = calculate_expected_away_team_points(scoreline_probability_distribution)
+
+        print(event_name)
+        print(f"{home_team_name} expected points: {expected_home_team_points}")
+        print(f"{away_team_name} expected points: {expected_away_team_points}")
 
 
 def get_match_odds(market, home_team_name, away_team_name):

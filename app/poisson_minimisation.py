@@ -2,11 +2,14 @@ import math
 import numpy as np
 from scipy.optimize import minimize
 from scipy.stats import poisson
+from collections import defaultdict
 from match_odds import MatchOdds
 from odds import Odds
 from total_goals_odds import TotalGoalsOdds
 from asian_handicap_odds import AsianHandicapOdds
 from functools import partial
+from expected_goals import ExpectedGoals
+from scoreline_probability_distribution import ScorelineProbabilityDistribution
 
 
 def quarter_line_half_loss(exceed_probability, push_probability):
@@ -135,13 +138,22 @@ def error(par,
             (hcp_away_sum - handicap_away_fair_probability)**2)
 
 
+def calculate_scoreline_distribution(expected_goals: ExpectedGoals, max_goals=8):
+    distribution = defaultdict(lambda: defaultdict(float))
+    for i in range(max_goals + 1):
+        for j in range(max_goals + 1):
+            prob = poisson.pmf(i, expected_goals.home) * poisson.pmf(j, expected_goals.away)
+            distribution[i][j] = prob
+    return ScorelineProbabilityDistribution(distribution)
+
+
 def find_expected_goals(
         match_odds: MatchOdds,
         asian_handicap_odds: AsianHandicapOdds,
         total_goals_odds: TotalGoalsOdds):
     home_fair_probability = match_odds.home_fair_probability()
     draw_fair_probability = match_odds.draw_fair_probability()
-    away_fair_probability = match_odds.away_probability()
+    away_fair_probability = match_odds.away_fair_probability()
     over_fair_probability = total_goals_odds.over_fair_probability()
     under_fair_probability = total_goals_odds.under_fair_probability()
     handicap_home_fair_probability = asian_handicap_odds.home_fair_probability()
@@ -184,11 +196,10 @@ def find_expected_goals(
         x0=initial_guess,
         method='Nelder-Mead'
     )
+
     goals = np.exp(result.x)
 
-    print(f"Home: {goals[0]}, Away: {goals[1]}")
-    print(f"TG: {goals[0] + goals[1]}")
-    print(f"HCP: {goals[0] - goals[1]}")
+    return ExpectedGoals(home=goals[0], away=goals[1])
 
 
 match_odds = MatchOdds(
@@ -210,4 +221,8 @@ asian_handicap_odds = AsianHandicapOdds(
     away_odds=Odds(1.94)
 )
 
-find_expected_goals(match_odds, asian_handicap_odds, total_goals_odds)
+expected_goals = find_expected_goals(match_odds, asian_handicap_odds, total_goals_odds)
+
+print(f"Home: {expected_goals.home}, Away: {expected_goals.away}")
+print(f"TG: {expected_goals.total_goals()}")
+print(f"HCP: {expected_goals.home_handicap()}")
