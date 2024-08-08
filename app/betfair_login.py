@@ -260,15 +260,22 @@ def get_total_goals_odds(market):
                     selection_book['handicap'] == primary_line['handicap']):
                 total_goals_odds.line = primary_line['handicap']
 
-                best_back = selection_book['ex']['availableToBack'][0]['price']
-                best_lay = selection_book['ex']['availableToLay'][0]['price']
-                best_price = Odds((best_back + best_lay) / 2)
+                if (isinstance(selection_book['ex']['availableToBack'], list) and
+                        len(selection_book['ex']['availableToBack']) > 0 and
+                        isinstance(selection_book['ex']['availableToLay'], list) and
+                        len(selection_book['ex']['availableToLay']) > 0):
+                    best_back = selection_book['ex']['availableToBack'][0]['price']
+                    best_lay = selection_book['ex']['availableToLay'][0]['price']
+                    best_price = Odds((best_back + best_lay) / 2)
 
-                if primary_line[RUNNER_NAME_KEY] == 'Under':
-                    total_goals_odds.under = best_price
+                    if primary_line[RUNNER_NAME_KEY] == 'Under':
+                        total_goals_odds.under = best_price
+                    else:
+                        total_goals_odds.over = best_price
+                    break
                 else:
-                    total_goals_odds.over = best_price
-                break
+                    print("Back and lay not both available")
+                    return None
 
     return total_goals_odds
 
