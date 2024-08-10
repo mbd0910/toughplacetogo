@@ -202,27 +202,27 @@ def find_expected_goals(
     return ExpectedGoals(home=goals[0], away=goals[1])
 
 
-match_odds = MatchOdds(
-    home=Odds(1.15),
-    draw=Odds(10),
-    away=Odds(25)
-)
-
-total_goals_odds = TotalGoalsOdds(
-    line=3.25,
-    under=Odds(2.01),
-    over=Odds(1.85)
-)
-
-asian_handicap_odds = AsianHandicapOdds(
-    home_line=-2.25,
-    home_odds=Odds(1.98),
-    away_line=2.25,
-    away_odds=Odds(1.94)
-)
-
-expected_goals = find_expected_goals(match_odds, asian_handicap_odds, total_goals_odds)
-
-print(f"Home: {expected_goals.home}, Away: {expected_goals.away}")
-print(f"TG: {expected_goals.total_goals()}")
-print(f"HCP: {expected_goals.home_handicap()}")
+# match_odds = MatchOdds(
+#     home=Odds(1.15),
+#     draw=Odds(10),
+#     away=Odds(25)
+# )
+#
+# total_goals_odds = TotalGoalsOdds(
+#     line=3.25,
+#     under=Odds(2.01),
+#     over=Odds(1.85)
+# )
+#
+# asian_handicap_odds = AsianHandicapOdds(
+#     home_line=-2.25,
+#     home_odds=Odds(1.98),
+#     away_line=2.25,
+#     away_odds=Odds(1.94)
+# )
+#
+# expected_goals = find_expected_goals(match_odds, asian_handicap_odds, total_goals_odds)
+#
+# print(f"Home: {expected_goals.home}, Away: {expected_goals.away}")
+# print(f"TG: {expected_goals.total_goals()}")
+# print(f"HCP: {expected_goals.home_handicap()}")

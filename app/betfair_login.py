@@ -10,6 +10,8 @@ from poisson_minimisation import calculate_scoreline_distribution, find_expected
 from calculate_expected_team_points import calculate_expected_home_team_points, calculate_expected_away_team_points
 from efl_game_prediction import EFLGamePrediction
 from efl_gameweek_prediction import EFLGameweekPrediction
+from betfair_event import BetfairEvent
+from datetime import datetime, timezone
 
 # Paths to your .crt and .key files
 cert_file = '/betfair/client-2048.crt'  # Your .crt file
@@ -66,22 +68,13 @@ def main():
             print(f"Login successful! Session Token: {session_token}")
             print(headers)
 
-            football_and_weekend_filter = json.dumps({
-                "filter": {
-                    "eventTypeIds": [FOOTBALL_EVENT_ID],
-                    "marketStartTime": {
-                        "from": "2024-08-09T00:00:00Z",
-                        "to": "2024-08-12T23:59:59Z"
-                    }
-                }
-            })
             football_weekend_and_competition_filter = json.dumps({
                 "filter": {
                     "eventTypeIds": [FOOTBALL_EVENT_ID],
                     "competitionIds": [CHAMPIONSHIP_ID, LEAGUE_ONE_ID, LEAGUE_TWO_ID],
                     "marketStartTime": {
-                        "from": "2024-08-09T00:00:00Z",
-                        "to": "2024-08-12T23:59:59Z"
+                        "from": "2024-08-10T00:00:00Z",
+                        "to": "2024-08-10T23:59:59Z"
                     }
                 }
             })
@@ -95,6 +88,8 @@ def main():
             output = "\n".join([f"{event['event']['id']},{event['event']['name']}" for event in json_response])
             print(output)
 
+            efl_gameweek_prediction = EFLGameweekPrediction()
+
             for event in json_response:
                 event_name = event['event']['name']
 
@@ -102,11 +97,37 @@ def main():
                         event_name != 'English League 1' and
                         event_name != 'English League 2'):
                     efl_game_prediction = process_event(event)
+                    efl_gameweek_prediction.add_game_prediction(efl_game_prediction)
 
-                    print(event_name)
-                    print(f"Home expected points: {efl_game_prediction.expected_home_points}")
-                    print(f"Away expected points: {efl_game_prediction.expected_away_points}")
+                    print(efl_game_prediction.betfair_event.event_name)
+                    print(f"Home expected goals/points: {efl_game_prediction.expected_goals.home} -> {efl_game_prediction.expected_home_points}")
+                    print(f"Away expected goals/points: {efl_game_prediction.expected_goals.away} -> {efl_game_prediction.expected_away_points}")
 
+            for game_prediction, team, sort_by_value in efl_gameweek_prediction.sort_teams_by_points():
+                # type: EFLGamePrediction, str, float
+                kickoff = game_prediction.betfair_event.kickoff
+                home_or_away = 'HOME' if game_prediction.is_home_team(team) else 'AWAY'
+
+                print(",".join([
+                    kickoff.strftime('%d-%m-%Y %H:%M'),
+                    home_or_away,
+                    team,
+                    game_prediction.opposition(team),
+                    f"{sort_by_value:.3f}",
+                    f"{game_prediction.score_more_than_two_probability_by_team(team):.3f}",
+                    f"{game_prediction.clean_sheet_probability_by_team(team):.3f}",
+                    f"{game_prediction.win_probability_by_team(team):.3f}",
+                    f"{game_prediction.match_odds_win_probability_by_team(team):.3f}",
+                    f"{game_prediction.total_goals_odds.line:.2f}",
+                    f"{game_prediction.total_goals_odds.over.price:.3f}",
+                    f"{game_prediction.total_goals_odds.under.price:.3f}",
+                    f"{game_prediction.asian_handicap_odds.home_line:.2f}",
+                    f"{game_prediction.asian_handicap_odds.home_odds.price:.3f}",
+                    f"{game_prediction.asian_handicap_odds.away_odds.price:.3f}",
+                    f"{game_prediction.match_odds.home.price:.3f}",
+                    f"{game_prediction.match_odds.draw.price:.3f}",
+                    f"{game_prediction.match_odds.away.price:.3f}"
+                ]))
         else:
             print(f"Login failed with status code: {response.status_code}")
             print(f"Response: {response.text}")
@@ -117,15 +138,24 @@ def main():
 def process_event(event):
     event_id = event['event']['id']
     event_name = event['event']['name']
+    kickoff = kickoff_to_datetime(event['event']['openDate'])
 
     home_team_name, away_team_name = event_name.split(' v ')
+
+    betfair_event = BetfairEvent(
+        event_id=event_id,
+        event_name=event_name,
+        kickoff=kickoff,
+        home_team=home_team_name,
+        away_team=away_team_name,
+    )
 
     # response = requests.post(list_competitions_endpoint, data=football_and_weekend_filter, headers=headers)
     # print(json.dumps(json.loads(response.text), indent=3))
 
     markets_for_a_game_filter = json.dumps({
         "filter": {
-            "eventIds": [event_id],
+            "eventIds": [betfair_event.event_id],
             #"marketBettingTypes": ["ASIAN_HANDICAP_DOUBLE_LINE"],
         },
         "maxResults": 200,
@@ -165,7 +195,7 @@ def process_event(event):
         expected_away_team_points = calculate_expected_away_team_points(scoreline_probability_distribution)
 
         return EFLGamePrediction(
-            event_name=event_name,
+            betfair_event=betfair_event,
             match_odds=match_odds,
             asian_handicap_odds=asian_handicap_odds,
             total_goals_odds=total_goals_odds,
@@ -300,6 +330,11 @@ def market_book(market_id):
 
     response = requests.post(list_market_book_endpoint, data=book_filter, headers=headers)
     return json.loads(response.text)
+
+
+def kickoff_to_datetime(kickoff_string):
+    naive_datetime_obj = datetime.strptime(kickoff_string, "%Y-%m-%dT%H:%M:%S.%fZ")
+    return naive_datetime_obj.replace(tzinfo=timezone.utc)
 
 
 main()
