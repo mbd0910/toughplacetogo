@@ -126,7 +126,9 @@ def main():
                     f"{game_prediction.asian_handicap_odds.away_odds.price:.3f}",
                     f"{game_prediction.match_odds.home.price:.3f}",
                     f"{game_prediction.match_odds.draw.price:.3f}",
-                    f"{game_prediction.match_odds.away.price:.3f}"
+                    f"{game_prediction.match_odds.away.price:.3f}",
+                    f"{game_prediction.expected_goals.home:.3f}",
+                    f"{game_prediction.expected_goals.away:.3f}"
                 ]))
         else:
             print(f"Login failed with status code: {response.status_code}")
