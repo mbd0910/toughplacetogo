@@ -9,12 +9,15 @@ numpy==2.0.1
 packaging==24.1
 peewee==3.17.6
 pip-tools==7.4.1
+psycopg==3.2.1
 psycopg2-binary==2.9.9
 pyproject_hooks==1.1.0
+python-decouple==3.8
 pytz==2024.1
 requests==2.32.3
 scipy==1.13.1
 setuptools==72.1.0
 sqlparse==0.5.1
+typing_extensions==4.12.2
 urllib3==2.2.2
 wheel==0.44.0
