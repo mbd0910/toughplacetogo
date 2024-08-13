@@ -12,18 +12,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='MetricType',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-            ],
-            options={
-                'db_table': 'metric_types',
-            },
-        ),
-        migrations.CreateModel(
             name='Game',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -54,19 +42,5 @@ class Migration(migrations.Migration):
             options={
                 'db_table': 'game_teams',
             },
-        ),
-        migrations.CreateModel(
-            name='GameTeamMetric',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('game_team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='game_team_metrics', to='football.gameteam')),
-                ('metric_type', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='game_team_metrics', to='football.metrictype')),
-                ('value', models.FloatField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-            ],
-            options={
-                'db_table': 'game_metrics',
-            },
-        ),
+        )
     ]

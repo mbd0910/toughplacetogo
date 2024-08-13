@@ -129,21 +129,21 @@ class GameTeam(models.Model):
         db_table = 'game_teams'
 
 
-class GameTeamMetric(models.Model):
-    game_team = models.ForeignKey(GameTeam, on_delete=models.CASCADE, related_name='game_team_metrics')
-    metric_type = models.ForeignKey('MetricType', on_delete=models.RESTRICT, related_name='game_team_metrics')
-    value = models.FloatField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'game_metrics'
-
-
-class MetricType(models.Model):
-    name = models.CharField(max_length=200)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'metric_types'
+# class GameTeamMetric(models.Model):
+#     game_team = models.ForeignKey(GameTeam, on_delete=models.CASCADE, related_name='game_team_metrics')
+#     metric_type = models.ForeignKey('MetricType', on_delete=models.RESTRICT, related_name='game_team_metrics')
+#     value = models.FloatField()
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#
+#     class Meta:
+#         db_table = 'game_metrics'
+#
+#
+# class MetricType(models.Model):
+#     name = models.CharField(max_length=200)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#
+#     class Meta:
+#         db_table = 'metric_types'
