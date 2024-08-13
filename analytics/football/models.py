@@ -103,47 +103,47 @@ class Stage(models.Model):
         return f"{self.season} - {self.name}"
 
 
-# class Game(models.Model):
-#     name = models.CharField(max_length=200, null=True)
-#     kickoff = models.DateTimeField()
-#     stage = models.ForeignKey(Stage, on_delete=models.RESTRICT, related_name='games')
-#     venue = models.ForeignKey('Venue', null=True, on_delete=models.RESTRICT, related_name='games')
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-#
-#     class Meta:
-#         db_table = 'games'
-#
-#
-# class GameTeam(models.Model):
-#     number = models.IntegerField()
-#     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='game_teams')
-#     team = models.ForeignKey(Team, on_delete=models.RESTRICT, related_name='game_teams')
-#     half_time_score = models.IntegerField(null=True)
-#     full_time_score = models.IntegerField(null=True)
-#     after_extra_time_score = models.IntegerField(null=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-#
-#     class Meta:
-#         db_table = 'game_teams'
-#
-#
-# class GameTeamMetric(models.Model):
-#     game_team = models.ForeignKey(GameTeam, on_delete=models.CASCADE, related_name='game_team_metrics')
-#     metric_type = models.ForeignKey('MetricType', on_delete=models.RESTRICT, related_name='game_team_metrics')
-#     value = models.FloatField()
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-#
-#     class Meta:
-#         db_table = 'game_metrics'
-#
-#
-# class MetricType(models.Model):
-#     name = models.CharField(max_length=200)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-#
-#     class Meta:
-#         db_table = 'metric_types'
+class Game(models.Model):
+    name = models.CharField(max_length=200, null=True)
+    kickoff = models.DateTimeField()
+    stage = models.ForeignKey(Stage, on_delete=models.RESTRICT, related_name='games')
+    venue = models.ForeignKey('Venue', null=True, on_delete=models.RESTRICT, related_name='games')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'games'
+
+
+class GameTeam(models.Model):
+    number = models.IntegerField()
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='game_teams')
+    team = models.ForeignKey(Team, on_delete=models.RESTRICT, related_name='game_teams')
+    half_time_score = models.IntegerField(null=True)
+    full_time_score = models.IntegerField(null=True)
+    after_extra_time_score = models.IntegerField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'game_teams'
+
+
+class GameTeamMetric(models.Model):
+    game_team = models.ForeignKey(GameTeam, on_delete=models.CASCADE, related_name='game_team_metrics')
+    metric_type = models.ForeignKey('MetricType', on_delete=models.RESTRICT, related_name='game_team_metrics')
+    value = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'game_metrics'
+
+
+class MetricType(models.Model):
+    name = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'metric_types'
