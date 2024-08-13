@@ -10,9 +10,23 @@ class Country(models.Model):
         db_table = 'countries'
 
 
+class Venue(models.Model):
+    name = models.CharField(max_length=200)
+    country = models.ForeignKey(Country, on_delete=models.RESTRICT, related_name='venues')
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True)
+    what_3_words = models.CharField(max_length=200, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'venues'
+
+
 class Team(models.Model):
     name = models.CharField(max_length=200)
     country = models.ForeignKey(Country, on_delete=models.RESTRICT, related_name='teams')
+    gender = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -22,6 +36,7 @@ class Team(models.Model):
 
 class Competition(models.Model):
     name = models.CharField(max_length=200)
+    gender = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -59,6 +74,7 @@ class Game(models.Model):
     name = models.CharField(max_length=200, null=True)
     kickoff = models.DateTimeField()
     stage = models.ForeignKey(Stage, on_delete=models.RESTRICT, related_name='games')
+    venue = models.ForeignKey('Venue', null=True, on_delete=models.RESTRICT, related_name='games')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
