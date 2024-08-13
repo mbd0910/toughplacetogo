@@ -1,8 +1,18 @@
 from django.db import models
 
 
+class Country(models.Model):
+    name = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'countries'
+
+
 class Team(models.Model):
     name = models.CharField(max_length=200)
+    country = models.ForeignKey(Country, on_delete=models.RESTRICT, related_name='teams')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
