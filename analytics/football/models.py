@@ -1,8 +1,35 @@
 from django.db import models
 
+GENDER_CHOICES = [
+    ('male', 'Male'),
+    ('female', 'Female'),
+]
+
+TEAM_TYPE_CHOICES = [
+    ('club', 'Club'),
+    ('national', 'National')
+]
+
+COMPETITION_TYPE_CHOICES = [
+    ('domestic', 'Club Domestic'),
+    ('club_international', 'Club International'),
+    ('national', 'National')
+]
+
+class Confederation(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    code = models.CharField(max_length=20, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'confederations'
+
 
 class Country(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
+    code = models.CharField(max_length=3, unique=True)
+    confederation = models.ForeignKey(Confederation, on_delete=models.RESTRICT, related_name='countries')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -25,8 +52,11 @@ class Venue(models.Model):
 
 class Team(models.Model):
     name = models.CharField(max_length=200)
+    gender = models.CharField(max_length=6, choices=GENDER_CHOICES),
+    team_type = models.CharField(max_length=20, choices=TEAM_TYPE_CHOICES),
     country = models.ForeignKey(Country, on_delete=models.RESTRICT, related_name='teams')
-    gender = models.CharField(max_length=6)
+    league_country = models.ForeignKey(Country, on_delete=models.RESTRICT, null=True, related_name='league_teams')
+    confederation = models.ForeignKey(Confederation, on_delete=models.RESTRICT, null=True, related_name='teams')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -36,7 +66,10 @@ class Team(models.Model):
 
 class Competition(models.Model):
     name = models.CharField(max_length=200)
-    gender = models.CharField(max_length=6)
+    gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
+    competition_type = models.CharField(max_length=20, choices=COMPETITION_TYPE_CHOICES)
+    country = models.ForeignKey(Country, on_delete=models.RESTRICT, null=True, related_name='competitions')
+    confederation = models.ForeignKey(Confederation, on_delete=models.RESTRICT, null=True, related_name='competitions')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
