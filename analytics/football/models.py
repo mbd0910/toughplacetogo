@@ -25,6 +25,9 @@ class Confederation(models.Model):
     class Meta:
         db_table = 'confederations'
 
+    def __str__(self):
+        return self.code
+
 
 class Country(models.Model):
     name = models.CharField(max_length=200, unique=True)
@@ -35,6 +38,8 @@ class Country(models.Model):
 
     class Meta:
         db_table = 'countries'
+        verbose_name = 'Country'
+        verbose_name_plural = 'Countries'
 
 
 class Venue(models.Model):
