@@ -49,9 +49,14 @@ class Venue(models.Model):
     class Meta:
         db_table = 'venues'
 
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'country'], name='unique_venue_name_country')
+        ]
+
 
 class Team(models.Model):
     name = models.CharField(max_length=200)
+    code = models.CharField(max_length=3, null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
     team_type = models.CharField(max_length=20, choices=TEAM_TYPE_CHOICES)
     country = models.ForeignKey(Country, on_delete=models.RESTRICT, related_name='teams')
@@ -62,6 +67,11 @@ class Team(models.Model):
 
     class Meta:
         db_table = 'teams'
+
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'country'], name='unique_team_name_country'),
+            models.UniqueConstraint(fields=['code', 'country'], name='unique_team_code_country')
+        ]
 
 
 class Competition(models.Model):
@@ -76,6 +86,10 @@ class Competition(models.Model):
     class Meta:
         db_table = 'competitions'
 
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'gender', 'country'], name='unique_competition_name_gender_country')
+        ]
+
 
 class Season(models.Model):
     name = models.CharField(max_length=200)
@@ -85,6 +99,10 @@ class Season(models.Model):
 
     class Meta:
         db_table = 'seasons'
+
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'competition'], name='unique_season_name_competition')
+        ]
 
     def __str__(self):
         return f"{self.competition.name} - {self.name}"
@@ -98,6 +116,10 @@ class Stage(models.Model):
 
     class Meta:
         db_table = 'stages'
+
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'season'], name='unique_stage_name_season')
+        ]
 
     def __str__(self):
         return f"{self.season} - {self.name}"
@@ -127,6 +149,52 @@ class GameTeam(models.Model):
 
     class Meta:
         db_table = 'game_teams'
+
+        constraints = [
+            models.UniqueConstraint(fields=['number', 'game'], name='unique_number_game'),
+            models.UniqueConstraint(fields=['game', 'team'], name='unique_game_team')
+        ]
+
+
+class Person(models.Model):
+    full_name = models.CharField(max_length=255)
+    surname = models.CharField(max_length=100)
+    nickname = models.CharField(max_length=100, null=True, blank=True)
+    date_of_birth = models.DateField()
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.display_name()
+
+    def display_name(self):
+        # Method to get the display name based on preferences
+        if self.nickname:
+            return self.nickname
+        elif self.surname:
+            return self.surname
+        else:
+            return self.full_name
+
+    def full_display_name(self):
+        # Method to get the full display name in "Nickname (Full Name)" format
+        if self.nickname:
+            return f"{self.nickname} ({self.full_name})"
+        else:
+            return self.full_name
+
+# class Player(Person):
+#     manager = models.OneToOneField('Manager')
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+class Manager(Person):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'managers'
 
 
 # class GameTeamMetric(models.Model):
