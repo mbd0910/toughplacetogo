@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('full_name', models.CharField(max_length=255)),
                 ('surname', models.CharField(max_length=100)),
-                ('nickname', models.CharField(blank=True, max_length=100, null=True)),
+                ('nickname', models.CharField(max_length=100, null=True)),
                 ('date_of_birth', models.DateField()),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),

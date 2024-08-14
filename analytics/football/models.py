@@ -159,7 +159,7 @@ class GameTeam(models.Model):
 class Person(models.Model):
     full_name = models.CharField(max_length=255)
     surname = models.CharField(max_length=100)
-    nickname = models.CharField(max_length=100, null=True, blank=True)
+    nickname = models.CharField(max_length=100, null=True)
     date_of_birth = models.DateField()
 
     class Meta:
