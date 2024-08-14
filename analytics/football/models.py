@@ -144,6 +144,7 @@ class GameTeam(models.Model):
     half_time_score = models.IntegerField(null=True)
     full_time_score = models.IntegerField(null=True)
     after_extra_time_score = models.IntegerField(null=True)
+    managers = models.ManyToManyField('Manager', through='GameTeamManager', related_name='game_teams', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -196,6 +197,14 @@ class Manager(Person):
     class Meta:
         db_table = 'managers'
 
+
+class GameTeamManager(models.Model):
+    game_team = models.ForeignKey(GameTeam, on_delete=models.CASCADE)
+    manager = models.ForeignKey(Manager, on_delete=models.RESTRICT)
+
+    class Meta:
+        unique_together = ('game_team', 'manager')
+        db_table = 'game_team_managers'
 
 # class GameTeamMetric(models.Model):
 #     game_team = models.ForeignKey(GameTeam, on_delete=models.CASCADE, related_name='game_team_metrics')
