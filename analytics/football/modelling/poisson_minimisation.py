@@ -8,9 +8,9 @@ from scipy.stats import poisson
 
 from football.asian_handicap_odds import AsianHandicapOdds
 from football.match_odds import MatchOdds
+from football.modelling.expected_goals import ExpectedGoals
+from football.modelling.scoreline_probability_distribution import ScorelineProbabilityDistribution
 from football.total_goals_odds import TotalGoalsOdds
-from football.expected_goals import ExpectedGoals
-from football.scoreline_probability_distribution import ScorelineProbabilityDistribution
 
 
 def quarter_line_half_loss(exceed_probability, push_probability):

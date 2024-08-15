@@ -1,4 +1,4 @@
-from football.scoreline_probability_distribution import ScorelineProbabilityDistribution
+from football.modelling.scoreline_probability_distribution import ScorelineProbabilityDistribution
 
 
 HOME_WIN_POINTS = 5

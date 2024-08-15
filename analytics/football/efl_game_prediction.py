@@ -1,8 +1,8 @@
-from football.betfair_event import BetfairEvent
-from football.expected_goals import ExpectedGoals
-from football.scoreline_probability_distribution import ScorelineProbabilityDistribution
 from football.asian_handicap_odds import AsianHandicapOdds
+from football.betfair_event import BetfairEvent
 from football.match_odds import MatchOdds
+from football.modelling.expected_goals import ExpectedGoals
+from football.modelling.scoreline_probability_distribution import ScorelineProbabilityDistribution
 from football.total_goals_odds import TotalGoalsOdds
 
 
