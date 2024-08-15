@@ -1,15 +1,16 @@
 import math
+from collections import defaultdict
+from functools import partial
+
 import numpy as np
 from scipy.optimize import minimize
 from scipy.stats import poisson
-from collections import defaultdict
-from match_odds import MatchOdds
-from odds import Odds
-from total_goals_odds import TotalGoalsOdds
-from asian_handicap_odds import AsianHandicapOdds
-from functools import partial
-from expected_goals import ExpectedGoals
-from scoreline_probability_distribution import ScorelineProbabilityDistribution
+
+from football.asian_handicap_odds import AsianHandicapOdds
+from football.match_odds import MatchOdds
+from football.total_goals_odds import TotalGoalsOdds
+from football.expected_goals import ExpectedGoals
+from football.scoreline_probability_distribution import ScorelineProbabilityDistribution
 
 
 def quarter_line_half_loss(exceed_probability, push_probability):

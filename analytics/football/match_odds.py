@@ -1,5 +1,7 @@
-from odds import Odds
 from moneyed import Money
+
+from football.odds import Odds
+
 
 class MatchOdds:
     def __init__(self, home: Odds = None, draw: Odds = None, away: Odds = None, total_matched: Money = None):

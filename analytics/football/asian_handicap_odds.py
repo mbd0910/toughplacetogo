@@ -1,5 +1,6 @@
-from odds import Odds
 from moneyed import Money
+
+from football.odds import Odds
 
 class AsianHandicapOdds:
     def __init__(self,

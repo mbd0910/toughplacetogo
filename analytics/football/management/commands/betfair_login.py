@@ -1,19 +1,23 @@
 from __future__ import annotations
+
 import json
-import os
-import requests
-from match_odds import MatchOdds
-from odds import Odds
-from asian_handicap_odds import AsianHandicapOdds
-from total_goals_odds import TotalGoalsOdds
-from poisson_minimisation import calculate_scoreline_distribution, find_expected_goals
-from calculate_expected_team_points import calculate_expected_home_team_points, calculate_expected_away_team_points
-from efl_game_prediction import EFLGamePrediction
-from efl_gameweek_prediction import EFLGameweekPrediction
-from betfair_event import BetfairEvent
 from datetime import datetime, timezone
-from moneyed import Money, GBP
+
+import requests
 from decouple import config
+from django.core.management.base import BaseCommand
+from moneyed import Money, GBP
+
+from football.betfair_event import BetfairEvent
+from football.efl_game_prediction import EFLGamePrediction
+from football.efl_gameweek_prediction import EFLGameweekPrediction
+from football.calculate_expected_team_points import calculate_expected_home_team_points, \
+    calculate_expected_away_team_points
+from football.poisson_minimisation import calculate_scoreline_distribution, find_expected_goals
+from football.asian_handicap_odds import AsianHandicapOdds
+from football.match_odds import MatchOdds
+from football.odds import Odds
+from football.total_goals_odds import TotalGoalsOdds
 
 # Paths to your .crt and .key files
 cert_file = config('BETFAIR_CERT_PATH') # '/betfair/client-2048.crt'  # Your .crt file
@@ -361,4 +365,9 @@ def kickoff_to_datetime(kickoff_string):
 def custom_format_money(money: Money):
     return f'{money.amount}'
 
-main()
+
+class Command(BaseCommand):
+    help = 'Runs the betfair login script'
+
+    def handle(self, *args, **kwargs):
+        main()

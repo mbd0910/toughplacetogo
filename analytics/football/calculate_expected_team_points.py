@@ -1,9 +1,4 @@
-from odds import Odds
-from match_odds import MatchOdds
-from asian_handicap_odds import AsianHandicapOdds
-from total_goals_odds import TotalGoalsOdds
-import math
-from scoreline_probability_distribution import ScorelineProbabilityDistribution
+from football.scoreline_probability_distribution import ScorelineProbabilityDistribution
 
 
 HOME_WIN_POINTS = 5
