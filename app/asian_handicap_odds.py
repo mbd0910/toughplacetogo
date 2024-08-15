@@ -1,13 +1,18 @@
 from odds import Odds
-
+from moneyed import Money
 
 class AsianHandicapOdds:
     def __init__(self,
-                 home_line: float = None, home_odds: Odds = None, away_line: float = None, away_odds: Odds = None):
+                 home_line: float = None,
+                 home_odds: Odds = None,
+                 away_line: float = None,
+                 away_odds: Odds = None,
+                 total_matched: Money = None):
         self._home_line = home_line
         self._home_odds = home_odds
         self._away_line = away_line
         self._away_odds = away_odds
+        self._total_matched = total_matched
 
     # Getter and Setter for home_line
     @property
@@ -45,6 +50,14 @@ class AsianHandicapOdds:
     def away_odds(self, value):
         self._away_odds = value
 
+    @property
+    def total_matched(self):
+        return self._total_matched
+
+    @total_matched.setter
+    def total_matched(self, value):
+        self._total_matched = value
+
     # String representation (__str__ method)
     def __str__(self):
         home_line_str = f"Home Line: {self._home_line}" if self._home_line is not None else "Home Line: None"
@@ -61,3 +74,6 @@ class AsianHandicapOdds:
 
     def away_fair_probability(self):
         return self.away_odds.implied_probability() / self.total_probability()
+
+    def overround(self):
+        return self.total_probability() - 1.0

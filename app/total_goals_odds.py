@@ -1,11 +1,12 @@
 from odds import Odds
-
+from moneyed import Money
 
 class TotalGoalsOdds:
-    def __init__(self, line: float = None, under: Odds = None, over: Odds = None):
+    def __init__(self, line: float = None, under: Odds = None, over: Odds = None, total_matched: Money = None):
         self._line = line
         self._under = under
         self._over = over
+        self._total_matched = total_matched
 
     # Getter and Setter for line
     @property
@@ -34,6 +35,14 @@ class TotalGoalsOdds:
     def over(self, value):
         self._over = value
 
+    @property
+    def total_matched(self):
+        return self._total_matched
+
+    @total_matched.setter
+    def total_matched(self, value):
+        self._total_matched = value
+
     # String representation (__str__ method)
     def __str__(self):
         line_str = f"Line: {self._line}" if self._line is not None else "Line: None"
@@ -49,3 +58,6 @@ class TotalGoalsOdds:
 
     def under_fair_probability(self):
         return self.under.implied_probability() / self.total_probability()
+
+    def overround(self):
+        return self.total_probability() - 1.0

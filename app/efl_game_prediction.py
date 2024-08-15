@@ -56,3 +56,9 @@ class EFLGamePrediction:
     def team_handicap_line(self, team_name):
         return self.asian_handicap_odds.home_line \
             if self.is_home_team(team_name) else self.asian_handicap_odds.away_line
+
+    def total_overround(self):
+        return self.match_odds.overround() + self.total_goals_odds.overround() + self.asian_handicap_odds.overround()
+
+    def total_matched(self):
+        return self.match_odds.total_matched + self.total_goals_odds.total_matched + self.asian_handicap_odds.total_matched

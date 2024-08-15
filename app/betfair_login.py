@@ -12,6 +12,7 @@ from efl_game_prediction import EFLGamePrediction
 from efl_gameweek_prediction import EFLGameweekPrediction
 from betfair_event import BetfairEvent
 from datetime import datetime, timezone
+from moneyed import Money, GBP
 
 # Paths to your .crt and .key files
 cert_file = '/betfair/client-2048.crt'  # Your .crt file
@@ -42,6 +43,7 @@ FOOTBALL_EVENT_ID = 1
 
 MARKET_ID_KEY = 'marketId'
 MARKET_NAME_KEY = 'marketName'
+TOTAL_MATCHED_KEY = 'totalMatched'
 RUNNERS_KEY = 'runners'
 RUNNER_NAME_KEY = 'runnerName'
 SELECTION_ID_KEY = 'selectionId'
@@ -73,8 +75,8 @@ def main():
                     "eventTypeIds": [FOOTBALL_EVENT_ID],
                     "competitionIds": [CHAMPIONSHIP_ID, LEAGUE_ONE_ID, LEAGUE_TWO_ID],
                     "marketStartTime": {
-                        "from": "2024-08-10T00:00:00Z",
-                        "to": "2024-08-10T23:59:59Z"
+                        "from": "2024-08-16T00:00:00Z",
+                        "to": "2024-08-19T23:59:59Z"
                     }
                 }
             })
@@ -97,11 +99,15 @@ def main():
                         event_name != 'English League 1' and
                         event_name != 'English League 2'):
                     efl_game_prediction = process_event(event)
-                    efl_gameweek_prediction.add_game_prediction(efl_game_prediction)
 
-                    print(efl_game_prediction.betfair_event.event_name)
-                    print(f"Home expected goals/points: {efl_game_prediction.expected_goals.home} -> {efl_game_prediction.expected_home_points}")
-                    print(f"Away expected goals/points: {efl_game_prediction.expected_goals.away} -> {efl_game_prediction.expected_away_points}")
+                    if efl_game_prediction:
+                        efl_gameweek_prediction.add_game_prediction(efl_game_prediction)
+
+                        print(efl_game_prediction.betfair_event.event_name)
+                        print(f"Home expected goals/points: {efl_game_prediction.expected_goals.home} -> {efl_game_prediction.expected_home_points}")
+                        print(f"Away expected goals/points: {efl_game_prediction.expected_goals.away} -> {efl_game_prediction.expected_away_points}")
+                    else:
+                        print(f"No prediction yet for {event_name}")
 
             for game_prediction, team, sort_by_value in efl_gameweek_prediction.sort_teams_by_points():
                 # type: EFLGamePrediction, str, float
@@ -114,6 +120,8 @@ def main():
                     team,
                     game_prediction.opposition(team),
                     f"{sort_by_value:.3f}",
+                    f"{custom_format_money(game_prediction.total_matched())}",
+                    f"{game_prediction.total_overround():.3f}",
                     f"{game_prediction.score_more_than_two_probability_by_team(team):.3f}",
                     f"{game_prediction.clean_sheet_probability_by_team(team):.3f}",
                     f"{game_prediction.win_probability_by_team(team):.3f}",
@@ -121,12 +129,15 @@ def main():
                     f"{game_prediction.total_goals_odds.line:.2f}",
                     f"{game_prediction.total_goals_odds.over.price:.3f}",
                     f"{game_prediction.total_goals_odds.under.price:.3f}",
+                    f"{custom_format_money(game_prediction.total_goals_odds.total_matched)}",
                     f"{game_prediction.asian_handicap_odds.home_line:.2f}",
                     f"{game_prediction.asian_handicap_odds.home_odds.price:.3f}",
                     f"{game_prediction.asian_handicap_odds.away_odds.price:.3f}",
+                    f"{custom_format_money(game_prediction.asian_handicap_odds.total_matched)}",
                     f"{game_prediction.match_odds.home.price:.3f}",
                     f"{game_prediction.match_odds.draw.price:.3f}",
                     f"{game_prediction.match_odds.away.price:.3f}",
+                    f"{custom_format_money(game_prediction.match_odds.total_matched)}",
                     f"{game_prediction.expected_goals.home:.3f}",
                     f"{game_prediction.expected_goals.away:.3f}"
                 ]))
@@ -213,13 +224,14 @@ def process_event(event):
 
 def get_match_odds(market, home_team_name, away_team_name):
     match_odds_market_id = market[MARKET_ID_KEY]
+    total_matched = Money(market[TOTAL_MATCHED_KEY], GBP)
     selections_by_id = {}
 
     for selection in market[RUNNERS_KEY]:
         selections_by_id[selection[SELECTION_ID_KEY]] = selection
 
     match_odds = market_book(match_odds_market_id)
-    match_odds_result = MatchOdds()
+    match_odds_result = MatchOdds(total_matched=total_matched)
 
     # print(json.dumps(match_odds, indent=3))
 
@@ -243,9 +255,10 @@ def get_match_odds(market, home_team_name, away_team_name):
 
 def get_asian_handicap_odds(market):
     asian_handicap_market_id = market[MARKET_ID_KEY]
+    total_matched = Money(market[TOTAL_MATCHED_KEY], GBP)
     asian_handicap_odds = market_book(asian_handicap_market_id)
 
-    asian_handicap_odds_result = AsianHandicapOdds()
+    asian_handicap_odds_result = AsianHandicapOdds(total_matched=total_matched)
     # print(json.dumps(asian_handicap_odds, indent=3))
 
     # Assumption that the primary handicap will be the first one in the keyLineDescription - will
@@ -281,11 +294,12 @@ def get_asian_handicap_odds(market):
 
 def get_total_goals_odds(market):
     total_goals_market_id = market[MARKET_ID_KEY]
+    total_matched = Money(market[TOTAL_MATCHED_KEY], GBP)
     total_goals_market = market_book(total_goals_market_id)
     # print(json.dumps(total_goals_market, indent=3))
     primary_lines = total_goals_market[0][KEY_LINE_DESCRIPTION_KEY][KEY_LINE_KEY]
 
-    total_goals_odds = TotalGoalsOdds()
+    total_goals_odds = TotalGoalsOdds(total_matched=total_matched)
 
     for selection in market[RUNNERS_KEY]:
         for primary_line in primary_lines:
@@ -338,5 +352,8 @@ def kickoff_to_datetime(kickoff_string):
     naive_datetime_obj = datetime.strptime(kickoff_string, "%Y-%m-%dT%H:%M:%S.%fZ")
     return naive_datetime_obj.replace(tzinfo=timezone.utc)
 
+
+def custom_format_money(money: Money):
+    return f'{money.amount}'
 
 main()
