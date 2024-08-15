@@ -59,5 +59,11 @@ class TotalGoalsOdds:
     def under_fair_probability(self):
         return self.under.implied_probability() / self.total_probability()
 
+    def implied_probability_discrepancy(self):
+        return abs(self.over_fair_probability() - self.under_fair_probability())
+
     def overround(self):
         return self.total_probability() - 1.0
+
+    def odds_ratio(self):
+        return self.over.price / self.under.price

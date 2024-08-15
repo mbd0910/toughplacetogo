@@ -75,5 +75,11 @@ class AsianHandicapOdds:
     def away_fair_probability(self):
         return self.away_odds.implied_probability() / self.total_probability()
 
+    def implied_probability_discrepancy(self):
+        return abs(self.home_fair_probability() - self.away_fair_probability())
+
     def overround(self):
         return self.total_probability() - 1.0
+
+    def odds_ratio(self):
+        return self.home_odds.price / self.away_odds.price
