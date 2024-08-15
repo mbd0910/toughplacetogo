@@ -13,6 +13,7 @@ from efl_gameweek_prediction import EFLGameweekPrediction
 from betfair_event import BetfairEvent
 from datetime import datetime, timezone
 from moneyed import Money, GBP
+from decouple import config
 
 # Paths to your .crt and .key files
 cert_file = '/betfair/client-2048.crt'  # Your .crt file
@@ -23,12 +24,12 @@ login_url = 'https://identitysso-cert.betfair.com/api/certlogin'
 
 # Your Betfair username and password
 payload = {
-    'username': os.getenv('BETFAIR_USERNAME'),
-    'password': os.getenv('BETFAIR_PASSWORD')
+    'username': config('BETFAIR_USERNAME'),
+    'password': config('BETFAIR_PASSWORD')
 }
 
 headers = {
-    'X-Application' : os.getenv('BETFAIR_APPLICATION_KEY'),
+    'X-Application' : config('BETFAIR_APPLICATION_KEY'),
 }
 
 url_prefix = 'https://api.betfair.com/exchange/betting/rest/v1.0/'
