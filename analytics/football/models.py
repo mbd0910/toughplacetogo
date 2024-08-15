@@ -61,6 +61,7 @@ class Venue(models.Model):
 
 class Team(models.Model):
     name = models.CharField(max_length=200)
+    short_name = models.CharField(max_length=20, null=True)
     code = models.CharField(max_length=3, null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
     team_type = models.CharField(max_length=20, choices=TEAM_TYPE_CHOICES)

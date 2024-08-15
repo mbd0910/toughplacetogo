@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=200)),
+                ('short_name', models.CharField(max_length=20, null=True)),
                 ('code', models.CharField(max_length=3, null=True)),
                 ('gender', models.CharField(choices=[('male', 'Male'), ('female', 'Female')], max_length=6)),
                 ('team_type', models.CharField(choices=[('club', 'Club'), ('national', 'National')], max_length=20)),
