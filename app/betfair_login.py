@@ -16,8 +16,8 @@ from moneyed import Money, GBP
 from decouple import config
 
 # Paths to your .crt and .key files
-cert_file = '/betfair/client-2048.crt'  # Your .crt file
-key_file = '/betfair/client-2048.key'    # Your .key file
+cert_file = config('BETFAIR_CERT_PATH') # '/betfair/client-2048.crt'  # Your .crt file
+key_file = config('BETFAIR_KEY_PATH') # /betfair/client-2048.key'    # Your .key file
 
 # Betfair's login URL for certificate-based API access
 login_url = 'https://identitysso-cert.betfair.com/api/certlogin'
