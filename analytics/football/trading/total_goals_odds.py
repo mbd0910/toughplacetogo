@@ -1,6 +1,6 @@
 from moneyed import Money
 
-from football.odds import Odds
+from football.trading.odds import Odds
 
 
 class TotalGoalsOdds:

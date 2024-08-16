@@ -1,6 +1,6 @@
 from typing import List
 
-from football.efl_game_prediction import EFLGamePrediction
+from football.fantasy.efl_game_prediction import EFLGamePrediction
 
 
 class EFLGameweekPrediction:

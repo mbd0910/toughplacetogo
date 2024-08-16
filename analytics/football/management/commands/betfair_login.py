@@ -8,16 +8,16 @@ from decouple import config
 from django.core.management.base import BaseCommand
 from moneyed import Money, GBP
 
-from football.asian_handicap_odds import AsianHandicapOdds
-from football.betfair_event import BetfairEvent
-from football.efl_game_prediction import EFLGamePrediction
-from football.efl_gameweek_prediction import EFLGameweekPrediction
-from football.match_odds import MatchOdds
+from football.fantasy.efl_game_prediction import EFLGamePrediction
+from football.fantasy.efl_gameweek_prediction import EFLGameweekPrediction
 from football.modelling.calculate_expected_team_points import calculate_expected_home_team_points, \
     calculate_expected_away_team_points
 from football.modelling.poisson_minimisation import calculate_scoreline_distribution, find_expected_goals
-from football.odds import Odds
-from football.total_goals_odds import TotalGoalsOdds
+from football.trading.asian_handicap_odds import AsianHandicapOdds
+from football.trading.betfair_event import BetfairEvent
+from football.trading.match_odds import MatchOdds
+from football.trading.odds import Odds
+from football.trading.total_goals_odds import TotalGoalsOdds
 
 # Paths to your .crt and .key files
 cert_file = config('BETFAIR_CERT_PATH') # '/betfair/client-2048.crt'  # Your .crt file

@@ -1,9 +1,9 @@
-from football.asian_handicap_odds import AsianHandicapOdds
-from football.betfair_event import BetfairEvent
-from football.match_odds import MatchOdds
 from football.modelling.expected_goals import ExpectedGoals
 from football.modelling.scoreline_probability_distribution import ScorelineProbabilityDistribution
-from football.total_goals_odds import TotalGoalsOdds
+from football.trading.asian_handicap_odds import AsianHandicapOdds
+from football.trading.betfair_event import BetfairEvent
+from football.trading.match_odds import MatchOdds
+from football.trading.total_goals_odds import TotalGoalsOdds
 
 
 class EFLGamePrediction:
