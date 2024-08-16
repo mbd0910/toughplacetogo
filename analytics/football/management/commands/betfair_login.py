@@ -77,6 +77,7 @@ def main():
 
             football_weekend_and_competition_filter = json.dumps({
                 "filter": {
+                    #"eventIds": [33483395, 33483231],
                     "eventTypeIds": [FOOTBALL_EVENT_ID],
                     "competitionIds": [CHAMPIONSHIP_ID, LEAGUE_ONE_ID, LEAGUE_TWO_ID],
                     "marketStartTime": {

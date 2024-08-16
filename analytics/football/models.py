@@ -1,20 +1,8 @@
 from django.db import models
 
-GENDER_CHOICES = [
-    ('male', 'Male'),
-    ('female', 'Female'),
-]
+from football.enums import CompetitionType, ExternalSource, Gender, TeamExternalLinkType, TeamType
 
-TEAM_TYPE_CHOICES = [
-    ('club', 'Club'),
-    ('national', 'National')
-]
 
-COMPETITION_TYPE_CHOICES = [
-    ('domestic', 'Club Domestic'),
-    ('club_international', 'Club International'),
-    ('national', 'National')
-]
 
 class Confederation(models.Model):
     name = models.CharField(max_length=200, unique=True)
@@ -63,8 +51,8 @@ class Team(models.Model):
     name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=20, null=True)
     code = models.CharField(max_length=3, null=True)
-    gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
-    team_type = models.CharField(max_length=20, choices=TEAM_TYPE_CHOICES)
+    gender = models.CharField(max_length=6, choices=Gender.choices())
+    team_type = models.CharField(max_length=20, choices=TeamType.choices())
     country = models.ForeignKey(Country, on_delete=models.RESTRICT, related_name='teams')
     league_country = models.ForeignKey(Country, on_delete=models.RESTRICT, null=True, related_name='league_teams')
     confederation = models.ForeignKey(Confederation, on_delete=models.RESTRICT, null=True, related_name='teams')
@@ -80,10 +68,28 @@ class Team(models.Model):
         ]
 
 
+class TeamExternalLink(models.Model):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='external_links')
+    source = models.CharField(max_length=200, choices=ExternalSource.choices())
+    external_link_type = models.CharField(max_length=20, choices=TeamExternalLinkType.choices(), null=True)
+    value = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'team_external_links'
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=['team', 'external_link_type', 'source', 'value'], name='unique_team_type_source_value'
+            )
+        ]
+
+
 class Competition(models.Model):
     name = models.CharField(max_length=200)
-    gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
-    competition_type = models.CharField(max_length=20, choices=COMPETITION_TYPE_CHOICES)
+    gender = models.CharField(max_length=6, choices=Gender.choices())
+    competition_type = models.CharField(max_length=20, choices=CompetitionType.choices())
     country = models.ForeignKey(Country, on_delete=models.RESTRICT, null=True, related_name='competitions')
     confederation = models.ForeignKey(Confederation, on_delete=models.RESTRICT, null=True, related_name='competitions')
     created_at = models.DateTimeField(auto_now_add=True)
