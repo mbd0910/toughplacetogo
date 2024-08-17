@@ -40,3 +40,12 @@ class TeamExternalLinkType(StrEnum):
     @classmethod
     def choices(cls):
         return [(key.value, key.name) for key in cls]
+
+class GameStatus(StrEnum):
+    FINISHED = 'finished'
+    ABANDONED = 'abandoned'
+    FORFEIT = 'forfeit'
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]

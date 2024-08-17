@@ -1,7 +1,6 @@
 from django.db import models
 
-from football.enums import CompetitionType, ExternalSource, Gender, TeamExternalLinkType, TeamType
-
+from football.enums import CompetitionType, ExternalSource, GameStatus as GameStatusEnum, Gender, TeamExternalLinkType, TeamType
 
 
 class Confederation(models.Model):
@@ -151,6 +150,13 @@ class Game(models.Model):
 
     class Meta:
         db_table = 'games'
+
+
+class GameStatus(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='statuses')
+    status = models.CharField(max_length=50, choices=GameStatusEnum.choices())
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class GameTeam(models.Model):
