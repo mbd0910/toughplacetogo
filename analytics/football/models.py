@@ -67,6 +67,9 @@ class Team(models.Model):
             models.UniqueConstraint(fields=['code', 'country'], name='unique_team_code_country')
         ]
 
+    def __str__(self):
+        return self.name
+
 
 class TeamExternalLink(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='external_links')
