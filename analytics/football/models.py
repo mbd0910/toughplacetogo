@@ -144,6 +144,7 @@ class Game(models.Model):
     name = models.CharField(max_length=200, null=True)
     kickoff = models.DateTimeField()
     stage = models.ForeignKey(Stage, on_delete=models.RESTRICT, related_name='games')
+    finished = models.BooleanField(default=False)
     venue = models.ForeignKey('Venue', null=True, on_delete=models.RESTRICT, related_name='games')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -18,6 +18,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=200, null=True)),
                 ('kickoff', models.DateTimeField()),
                 ('stage', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='games', to='football.stage')),
+                ('finished', models.BooleanField(default=False)),
                 ('venue', models.ForeignKey(null=True, on_delete=django.db.models.deletion.RESTRICT, related_name='games', to='football.venue')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
