@@ -1,6 +1,7 @@
 from django.db import models
 
-from football.enums import CompetitionType, ExternalSource, GameStatus as GameStatusEnum, Gender, TeamExternalLinkType, TeamType
+from football.enums import CompetitionType, ExternalSource, FantasyFootballProvider, GameStatus as GameStatusEnum, \
+    GameweekType, Gender, TeamExternalLinkType, TeamType
 
 
 class Confederation(models.Model):
@@ -158,6 +159,13 @@ class GameStatus(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        db_table = 'game_statuses'
+
+        constraints = [
+            models.UniqueConstraint(fields=['game', 'status'], name='unique_game_status')
+        ]
+
 
 class GameTeam(models.Model):
     number = models.IntegerField()
@@ -227,6 +235,36 @@ class GameTeamManager(models.Model):
     class Meta:
         unique_together = ('game_team', 'manager')
         db_table = 'game_team_managers'
+
+class FantasyFootballGameweek(models.Model):
+    provider = models.CharField(max_length=50, choices=FantasyFootballProvider.choices())
+    stage = models.ForeignKey
+    number = models.IntegerField()
+    gameweek_type = models.CharField(max_length=20, choices=GameweekType.choices(), default=GameweekType.SINGLE)
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'fantasy_football_gameweeks'
+
+        constraints = [
+            models.UniqueConstraint(fields=['provider', 'stage', 'number'], name='unique_provider_stage_number')
+        ]
+
+class GameweekGame(models.Model):
+    gameweek = models.ForeignKey(FantasyFootballGameweek, on_delete=models.CASCADE, related_name='gameweek_games')
+    game = models.ForeignKey(Game, on_delete=models.RESTRICT, related_name='gameweek_games')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'fantasy_football_gameweek_games'
+
+        constraints = [
+            models.UniqueConstraint(fields=['gameweek', 'game'], name='unique_gameweek_game')
+        ]
 
 # class GameTeamMetric(models.Model):
 #     game_team = models.ForeignKey(GameTeam, on_delete=models.CASCADE, related_name='game_team_metrics')

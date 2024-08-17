@@ -49,3 +49,21 @@ class GameStatus(StrEnum):
     @classmethod
     def choices(cls):
         return [(key.value, key.name) for key in cls]
+
+class FantasyFootballProvider(StrEnum):
+    FPL = 'fpl'
+    EFL = 'efl'
+    FANTRAX = 'fantrax'
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
+
+class GameweekType(StrEnum):
+    SINGLE = 'single'
+    DOUBLE = 'double'
+    TRIPLE = 'triple'
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
