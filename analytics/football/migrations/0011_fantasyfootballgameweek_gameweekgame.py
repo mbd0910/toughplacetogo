@@ -18,6 +18,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('provider', models.CharField(choices=[('fpl', 'FPL'), ('efl', 'EFL'), ('fantrax', 'FANTRAX')], max_length=50)),
+                ('stage', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='fantasy_football_gameweeks', to='football.stage')),
                 ('number', models.IntegerField()),
                 ('gameweek_type', models.CharField(choices=[('single', 'SINGLE'), ('double', 'DOUBLE'), ('triple', 'TRIPLE')], default=GameweekType['SINGLE'], max_length=20)),
                 ('start_date', models.DateTimeField(null=True)),

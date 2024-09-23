@@ -81,8 +81,8 @@ def main():
                     "eventTypeIds": [FOOTBALL_EVENT_ID],
                     "competitionIds": [CHAMPIONSHIP_ID, LEAGUE_ONE_ID, LEAGUE_TWO_ID],
                     "marketStartTime": {
-                        "from": "2024-08-16T00:00:00Z",
-                        "to": "2024-08-19T23:59:59Z"
+                        "from": "2024-09-14T00:00:00Z",
+                        "to": "2024-09-16T23:59:59Z"
                     }
                 }
             })

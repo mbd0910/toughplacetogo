@@ -26,7 +26,7 @@ class Command(BaseCommand):
                     years = season_name.split('/')
                     if len(years) == 2:
                         start_year, end_year = years[0], years[1]
-                        if int(start_year) >= 2014:
+                        if int(start_year) >= 2019:
                             competition_name = self.competition_from_file_name(file)
                             stage = Stage.objects.get(
                                 name='Regular Season',
@@ -39,13 +39,14 @@ class Command(BaseCommand):
                             print(f"Stage {stage.name}, {stage.season.name}, {stage.season.competition.name}")
                             self.process_csv_file(file_path, stage, caching_team_finder)
 
-    def parse_date(self, date_str):
-        try:
-            # Try parsing with four-digit year
-            return datetime.strptime(date_str, "%d/%m/%Y")
-        except ValueError:
-            # Fallback to two-digit year format if the four-digit format fails
-            return datetime.strptime(date_str, "%d/%m/%y")
+    def parse_date(self, date_str, time_str):
+        datetime_str = f"{date_str} {time_str}"
+        for format in ("%d/%m/%Y %H:%M", "%d/%m/%y %H:%M"):
+            try:
+                return datetime.strptime(datetime_str, format)
+            except ValueError:
+                continue
+        raise ValueError(f"Date and time format not recognized: {datetime_str}")
 
 
     def empty_string_to_none(self, s):
@@ -63,9 +64,10 @@ class Command(BaseCommand):
                 ht_home_goals = self.empty_string_to_none(row['HTHG'])
                 ht_away_goals = self.empty_string_to_none(row['HTAG'])
                 date = row['Date']
+                time = row['Time']
                 print(f"Raw data is {date}: {home_team_name} v {away_team_name} - {ft_home_goals} : {ft_away_goals}")
 
-                kickoff = self.parse_date(date)
+                kickoff = self.parse_date(date, time)
 
                 home_team = caching_team_finder.find_team(home_team_name, TeamExternalLinkType.NAME, ExternalSource.FOOTBALL_DATA)
                 away_team = caching_team_finder.find_team(away_team_name, TeamExternalLinkType.NAME, ExternalSource.FOOTBALL_DATA)

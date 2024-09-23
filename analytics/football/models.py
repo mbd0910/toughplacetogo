@@ -238,7 +238,7 @@ class GameTeamManager(models.Model):
 
 class FantasyFootballGameweek(models.Model):
     provider = models.CharField(max_length=50, choices=FantasyFootballProvider.choices())
-    stage = models.ForeignKey
+    stage = models.ForeignKey(Stage, on_delete=models.RESTRICT, related_name='fantasy_football_gameweeks')
     number = models.IntegerField()
     gameweek_type = models.CharField(max_length=20, choices=GameweekType.choices(), default=GameweekType.SINGLE)
     start_date = models.DateTimeField(null=True)
