@@ -6,6 +6,7 @@ import os
 import csv
 from datetime import datetime
 from football.finder import CachingTeamFinder, find_game
+import pytz
 
 
 class Command(BaseCommand):
@@ -39,6 +40,7 @@ class Command(BaseCommand):
                             print(f"Stage {stage.name}, {stage.season.name}, {stage.season.competition.name}")
                             self.process_csv_file(file_path, stage, caching_team_finder)
 
+
     def parse_date(self, date_str, time_str):
         datetime_str = f"{date_str} {time_str}"
         for format in ("%d/%m/%Y %H:%M", "%d/%m/%y %H:%M"):
@@ -67,7 +69,11 @@ class Command(BaseCommand):
                 time = row['Time']
                 print(f"Raw data is {date}: {home_team_name} v {away_team_name} - {ft_home_goals} : {ft_away_goals}")
 
+                london_tz = pytz.timezone('Europe/London')
+                utc_tz = pytz.utc
                 kickoff = self.parse_date(date, time)
+                kickoff = london_tz.localize(kickoff)
+                kickoff = kickoff.astimezone(utc_tz)
 
                 home_team = caching_team_finder.find_team(home_team_name, TeamExternalLinkType.NAME, ExternalSource.FOOTBALL_DATA)
                 away_team = caching_team_finder.find_team(away_team_name, TeamExternalLinkType.NAME, ExternalSource.FOOTBALL_DATA)
@@ -113,6 +119,3 @@ class Command(BaseCommand):
                 return 'League Two'
             case 'EC.csv':
                 return 'National League'
-
-
-
