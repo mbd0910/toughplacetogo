@@ -149,6 +149,18 @@ class Game(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def home_team(self):
+        return self.team(1)
+
+    def away_team(self):
+        return self.team(2)
+
+    def team(self, number):
+        for game_team in self.game_teams.all():
+            if game_team.number == number:
+                return game_team
+        raise Exception(f'Cannot find game team with index {number}')
+
     class Meta:
         db_table = 'games'
 
