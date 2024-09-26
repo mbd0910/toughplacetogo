@@ -1,8 +1,7 @@
-from django.shortcuts import render
 from django.http import HttpResponse
 
 from football.models import Stage, Game, GameTeam, Team
-from football.league_table import LeagueTable
+from football.league_table import GamePOV, LeagueTable
 from django.db.models import Prefetch
 
 
@@ -32,10 +31,18 @@ def calculate_league_table(games):
     for game in games:
         home_game_team = game.home_team()
         away_game_team = game.away_team()
-        home_team_row = league_table.get_team_row(home_game_team.team.name)
-        away_team_row = league_table.get_team_row(away_game_team.team.name)
-        home_team_row.add_result(home_game_team.full_time_score, away_game_team.full_time_score)
-        away_team_row.add_result(away_game_team.full_time_score, home_game_team.full_time_score)
+        home_team = home_game_team.team
+        away_team = away_game_team.team
+        home_team_row = league_table.get_team_row(home_team)
+        away_team_row = league_table.get_team_row(away_team)
+        home_goals = home_game_team.full_time_score
+        away_goals = away_game_team.full_time_score
+
+        home_game_pov = GamePOV(home_team, away_team, home_goals, away_goals, is_home=True)
+        away_game_pov = GamePOV(away_team, home_team, away_goals, home_goals, is_home=False)
+
+        home_team_row.add_game_pov(home_game_pov)
+        away_team_row.add_game_pov(away_game_pov)
 
     print(league_table)
 
