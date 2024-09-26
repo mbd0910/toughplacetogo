@@ -36,7 +36,6 @@ class LeagueTableRow:
         self.conceded = 0
         self.game_povs = []
 
-
     def games_played(self):
         return self.wins + self.draws + self.losses
 
@@ -59,6 +58,24 @@ class LeagueTableRow:
             self.draws += 1
         else:
             self.losses += 1
+
+    def most_recent_games(self, limit = 5):
+        if limit <= 0:
+            return []
+        return self.game_povs[-limit:]
+
+    def most_recent_home_games(self, limit = 5):
+        return self.most_recent_games_matching_criteria(is_home=True, limit=limit)
+
+    def most_recent_away_games(self, limit = 5):
+        return self.most_recent_games_matching_criteria(is_home=False, limit=limit)
+
+    def most_recent_games_matching_criteria(self, is_home: bool, limit = 5):
+        if limit <= 0:
+            return []
+        filtered_list = [game_pov for game_pov in self.game_povs if game_pov.is_home == is_home]
+        return filtered_list[-limit:]
+
 
     def __str__(self):
         return f"{self.team.name} {self.games_played()} {self.wins} {self.draws} {self.losses} {self.scored} {self.conceded} {self.points()}"

@@ -19,7 +19,7 @@ def league_table(request, competition_name, season_name):
         'game_teams',
         queryset=GameTeam.objects.select_related('team'),
     )
-    games = Game.objects.prefetch_related(game_teams_with_team_prefetch).filter(stage=stage)
+    games = Game.objects.prefetch_related(game_teams_with_team_prefetch).filter(stage=stage).order_by('kickoff')
 
     calculate_league_table(games)
 
