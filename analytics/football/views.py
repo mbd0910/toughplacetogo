@@ -1,8 +1,9 @@
 from django.http import HttpResponse
 
 from football.models import Stage, Game, GameTeam, Team
-from football.league_table import GamePOV, LeagueTable
+from football.league_table import GamePOV, LeagueTable, LeagueTableRow
 from django.db.models import Prefetch
+
 
 
 def index(request):
@@ -27,14 +28,22 @@ def league_table(request, competition_name, season_name):
 
 
 def calculate_league_table(games):
-    league_table = LeagueTable()
+    rows_by_team_name = {}
+
+    def get_league_table_row(team):
+        team_name = team.name
+        if team_name not in rows_by_team_name:
+            rows_by_team_name[team_name] = LeagueTableRow(team)
+        return rows_by_team_name[team_name]
+
     for game in games:
         home_game_team = game.home_team()
         away_game_team = game.away_team()
         home_team = home_game_team.team
         away_team = away_game_team.team
-        home_team_row = league_table.get_team_row(home_team)
-        away_team_row = league_table.get_team_row(away_team)
+
+        home_team_row = get_league_table_row(home_team)
+        away_team_row = get_league_table_row(away_team)
         home_goals = home_game_team.full_time_score
         away_goals = away_game_team.full_time_score
 
@@ -44,6 +53,13 @@ def calculate_league_table(games):
         home_team_row.add_game_pov(home_game_pov)
         away_team_row.add_game_pov(away_game_pov)
 
+    sorted_league_table_rows = sorted(
+        rows_by_team_name.values(),
+        key=lambda row: (row.points(), row.goal_difference(), row.scored, row.team.name),
+        reverse=True
+    )
+
+    league_table = LeagueTable(sorted_league_table_rows)
     print(league_table)
 
 

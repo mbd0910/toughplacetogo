@@ -1,21 +1,5 @@
 from football.models import Team
-
-class LeagueTable:
-    def __init__(self, rows=None):
-        if rows is None:
-            rows = {}
-        self.rows = rows
-
-    def get_team_row(self, team: Team):
-        team_name = team.name
-        if team_name not in self.rows:
-            self.rows[team_name] = LeagueTableRow(team)
-
-        return self.rows[team_name]
-
-    def __str__(self):
-        return "\n".join(row.__str__() for row in self.rows.values())
-
+from typing import List
 
 class GamePOV:
     def __init__(self, team: Team, opposition: Team, scored: int, conceded: int, is_home: bool):
@@ -76,6 +60,15 @@ class LeagueTableRow:
         filtered_list = [game_pov for game_pov in self.game_povs if game_pov.is_home == is_home]
         return filtered_list[-limit:]
 
-
     def __str__(self):
         return f"{self.team.name} {self.games_played()} {self.wins} {self.draws} {self.losses} {self.scored} {self.conceded} {self.points()}"
+
+
+
+class LeagueTable:
+    def __init__(self, sorted_rows: List[LeagueTableRow]): #, team_to_position):
+        self.sorted_rows = sorted_rows
+        #self.team_to_position = team_to_position
+
+    def __str__(self):
+        return "\n".join(row.__str__() for row in self.sorted_rows)
