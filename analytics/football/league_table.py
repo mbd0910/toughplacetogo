@@ -66,9 +66,11 @@ class LeagueTableRow:
 
 
 class LeagueTable:
-    def __init__(self, sorted_rows: List[LeagueTableRow]): #, team_to_position):
+    def __init__(self, sorted_rows: List[LeagueTableRow]):
         self.sorted_rows = sorted_rows
-        #self.team_to_position = team_to_position
+
+    def team_to_position(self):
+        return {row.team: position for position, row in enumerate(self.sorted_rows, start=1)}
 
     def __str__(self):
         return "\n".join(row.__str__() for row in self.sorted_rows)
