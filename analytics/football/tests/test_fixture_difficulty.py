@@ -36,7 +36,7 @@ class FixtureDifficultyTestCase(TestCase):
 
         league_table_position_fixture_difficulty = calculate_fixture_difficulty(league_table_row, team_to_position)
 
-        self.assertEqual(5.75, league_table_position_fixture_difficulty)
+        self.assertEqual(4.75, league_table_position_fixture_difficulty)
 
     def test_calculate_fixture_difficulties(self):
         """Calculates fixture difficulties for all teams in league"""
@@ -93,9 +93,9 @@ class FixtureDifficultyTestCase(TestCase):
         fixture_difficulties = calculate_fixture_difficulties(league_table)
 
         self.assertEqual(6, len(fixture_difficulties))
-        self.assertEqual(4, fixture_difficulties[team1_row].average_position)
-        self.assertEqual(2, fixture_difficulties[team2_row].average_position)
-        self.assertEqual(4, fixture_difficulties[team3_row].average_position)
-        self.assertEqual(3, fixture_difficulties[team4_row].average_position)
-        self.assertEqual(4, fixture_difficulties[team5_row].average_position)
-        self.assertEqual(2, fixture_difficulties[team6_row].average_position)
+        self.assertEqual(3, fixture_difficulties[team1_row])
+        self.assertEqual(1.5, fixture_difficulties[team2_row])
+        self.assertEqual(3.5, fixture_difficulties[team3_row])
+        self.assertEqual(2.5, fixture_difficulties[team4_row])
+        self.assertEqual(4, fixture_difficulties[team5_row])
+        self.assertEqual(2, fixture_difficulties[team6_row])
