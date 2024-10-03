@@ -1,5 +1,6 @@
 from football.models import Team
-from typing import List
+from typing import List, Dict
+from statistics import mean
 
 class GamePOV:
     def __init__(self, team: Team, opposition: Team, scored: int, conceded: int, is_home: bool):
@@ -11,14 +12,16 @@ class GamePOV:
 
 
 class LeagueTableRow:
-    def __init__(self, team: Team):
+    def __init__(self, team: Team, game_povs=None):
+        if game_povs is None:
+            game_povs = []
         self.team = team
         self.wins = 0
         self.draws = 0
         self.losses = 0
         self.scored = 0
         self.conceded = 0
-        self.game_povs = []
+        self.game_povs = game_povs
 
     def games_played(self):
         return self.wins + self.draws + self.losses
@@ -64,7 +67,6 @@ class LeagueTableRow:
         return f"{self.team.name} {self.games_played()} {self.wins} {self.draws} {self.losses} {self.scored} {self.conceded} {self.points()}"
 
 
-
 class LeagueTable:
     def __init__(self, sorted_rows: List[LeagueTableRow]):
         self.sorted_rows = sorted_rows
@@ -74,3 +76,13 @@ class LeagueTable:
 
     def __str__(self):
         return "\n".join(row.__str__() for row in self.sorted_rows)
+
+
+class FixtureDifficulty:
+    def __init__(self, average_position):
+        self.average_position = average_position
+
+
+def calculate_fixture_difficulty(row: LeagueTableRow, team_to_position: Dict[Team, int]) -> FixtureDifficulty:
+    positions = [team_to_position[game_pov.opposition] for game_pov in row.game_povs]
+    return FixtureDifficulty(mean(positions)) if positions else None
