@@ -55,7 +55,7 @@
                 <td>{{ row.conceded }}</td>
                 <td>{{ row.goal_difference }}</td>
                 <td>{{ row.points }}</td>
-                <td>{{ fixture_difficulties|get_fixture_difficulty_average_position:row.team.name }}</td>
+                <td>{{ fixture_difficulties|get_fixture_difficulty_average_position:row }}</td>
             </tr>
         {% endfor %}
     </tbody>

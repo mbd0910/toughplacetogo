@@ -89,6 +89,6 @@ def calculate_fixture_difficulty(row: LeagueTableRow, team_to_position: Dict[Tea
     positions = [team_to_position[game_pov.opposition] for game_pov in row.game_povs]
     return FixtureDifficulty(mean(positions)) if positions else None
 
-def calculate_fixture_difficulties(league_table: LeagueTable) -> Dict[str, FixtureDifficulty]:
+def calculate_fixture_difficulties(league_table: LeagueTable) -> Dict[LeagueTableRow, FixtureDifficulty]:
     team_to_position = league_table.team_to_position()
-    return {row.team.name: calculate_fixture_difficulty(row, team_to_position) for row in league_table.sorted_rows}
+    return {row: calculate_fixture_difficulty(row, team_to_position) for row in league_table.sorted_rows}
