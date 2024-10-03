@@ -5,6 +5,7 @@ certifi==2024.7.4
 charset-normalizer==3.3.2
 click==8.1.7
 Django==5.1
+git-filter-repo==2.45.0
 idna==3.7
 numpy==2.0.1
 packaging==24.1

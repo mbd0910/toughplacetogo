@@ -1,6 +1,8 @@
 from football.models import Team
 from typing import List, Dict
 from statistics import mean
+import numpy as np
+from scipy.stats import zscore
 
 class GamePOV:
     def __init__(self, team: Team, opposition: Team, scored: int, conceded: int, is_home: bool):
@@ -85,10 +87,22 @@ class FixtureDifficulty:
     def __str__(self):
         return f'Average position of opponent is {self.average_position}'
 
-def calculate_fixture_difficulty(row: LeagueTableRow, team_to_position: Dict[Team, int]) -> FixtureDifficulty:
-    positions = [team_to_position[game_pov.opposition] for game_pov in row.game_povs]
-    return FixtureDifficulty(mean(positions)) if positions else None
+def calculate_fixture_difficulty(row: LeagueTableRow, team_to_position: Dict[Team, int]):
+    team_position = team_to_position[row.team]
+    positions = [
+        team_to_position[game_pov.opposition] - 1 if team_to_position[game_pov.opposition] > team_position else team_to_position[game_pov.opposition]
+        for game_pov in row.game_povs
+    ]
+    return mean(positions) if positions else None
 
-def calculate_fixture_difficulties(league_table: LeagueTable) -> Dict[LeagueTableRow, FixtureDifficulty]:
+def calculate_fixture_difficulties(league_table: LeagueTable) -> Dict[LeagueTableRow, float]:
     team_to_position = league_table.team_to_position()
-    return {row: calculate_fixture_difficulty(row, team_to_position) for row in league_table.sorted_rows}
+    raw_league_position_fixture_difficulties = \
+        {row: calculate_fixture_difficulty(row, team_to_position) for row in league_table.sorted_rows}
+
+    raw_difficulties = np.array(list(raw_league_position_fixture_difficulties.values()))
+    # print(raw_difficulties)
+    normalized_difficulties = zscore(raw_difficulties)
+    # print(normalized_difficulties)
+
+    return raw_league_position_fixture_difficulties

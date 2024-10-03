@@ -34,9 +34,9 @@ class FixtureDifficultyTestCase(TestCase):
         game_povs = [game_pov1, game_pov2, game_pov3, game_pov4]
         league_table_row = LeagueTableRow(team=team1, game_povs=game_povs)
 
-        fixture_difficulty = calculate_fixture_difficulty(league_table_row, team_to_position)
+        league_table_position_fixture_difficulty = calculate_fixture_difficulty(league_table_row, team_to_position)
 
-        self.assertEqual(5.75, fixture_difficulty.average_position)
+        self.assertEqual(5.75, league_table_position_fixture_difficulty)
 
     def test_calculate_fixture_difficulties(self):
         """Calculates fixture difficulties for all teams in league"""
