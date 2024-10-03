@@ -82,7 +82,13 @@ class FixtureDifficulty:
     def __init__(self, average_position):
         self.average_position = average_position
 
+    def __str__(self):
+        return f'Average position of opponent is {self.average_position}'
 
 def calculate_fixture_difficulty(row: LeagueTableRow, team_to_position: Dict[Team, int]) -> FixtureDifficulty:
     positions = [team_to_position[game_pov.opposition] for game_pov in row.game_povs]
     return FixtureDifficulty(mean(positions)) if positions else None
+
+def calculate_fixture_difficulties(league_table: LeagueTable) -> Dict[LeagueTableRow, FixtureDifficulty]:
+    team_to_position = league_table.team_to_position()
+    return {row: calculate_fixture_difficulty(row, team_to_position) for row in league_table.sorted_rows}

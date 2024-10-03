@@ -1,10 +1,10 @@
+from pprint import pprint
+
 from django.http import HttpResponse
 
 from football.models import Stage, Game, GameTeam, Team
-from football.league_table import GamePOV, LeagueTable, LeagueTableRow
+from football.league_table import GamePOV, LeagueTable, LeagueTableRow, calculate_fixture_difficulties
 from django.db.models import Prefetch
-
-
 
 def index(request):
     return HttpResponse("Hello, world. You're at the analytics index.")
@@ -60,7 +60,9 @@ def calculate_league_table(games):
     )
 
     league_table = LeagueTable(sorted_league_table_rows)
+    fixture_difficulties = calculate_fixture_difficulties(league_table)
     print(league_table)
+    pprint(fixture_difficulties)
 
 
 

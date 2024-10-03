@@ -1,10 +1,10 @@
 from django.test import TestCase
 
-from football.league_table import LeagueTableRow, GamePOV, calculate_fixture_difficulty
+from football.league_table import LeagueTableRow, GamePOV, LeagueTable, calculate_fixture_difficulties, calculate_fixture_difficulty
 from football.models import Team
 
 
-class LeagueTableTestCase(TestCase):
+class FixtureDifficultyTestCase(TestCase):
     def test_calculate_fixture_difficulty(self):
         """Calculates average fixture difficulty"""
         team1 = Team(id=1, name='Team 1')
@@ -37,3 +37,65 @@ class LeagueTableTestCase(TestCase):
         fixture_difficulty = calculate_fixture_difficulty(league_table_row, team_to_position)
 
         self.assertEqual(5.75, fixture_difficulty.average_position)
+
+    def test_calculate_fixture_difficulties(self):
+        """Calculates fixture difficulties for all teams in league"""
+        team1 = Team(id=1, name='Team 1')
+        team2 = Team(id=2, name='Team 2')
+        team3 = Team(id=3, name='Team 3')
+        team4 = Team(id=4, name='Team 4')
+        team5 = Team(id=5, name='Team 5')
+        team6 = Team(id=6, name='Team 6')
+        # A bit convoluted - ignore the scored and conceded values
+        team1_game_povs = [
+            GamePOV(team=team1, opposition=team2, scored=0, conceded=0, is_home=True),
+            GamePOV(team=team1, opposition=team4, scored=0, conceded=0, is_home=True),
+            GamePOV(team=team1, opposition=team6, scored=0, conceded=0, is_home=True),
+        ]
+        team2_game_povs = [
+            GamePOV(team=team2, opposition=team1, scored=0, conceded=0, is_home=False),
+            GamePOV(team=team2, opposition=team3, scored=0, conceded=0, is_home=True)
+        ]
+        team3_game_povs = [
+            GamePOV(team=team3, opposition=team2, scored=0, conceded=0, is_home=False),
+            GamePOV(team=team3, opposition=team6, scored=0, conceded=0, is_home=True)
+        ]
+        team4_game_povs = [
+            GamePOV(team=team4, opposition=team1, scored=0, conceded=0, is_home=False),
+            GamePOV(team=team4, opposition=team5, scored=0, conceded=0, is_home=False)
+        ]
+        team5_game_povs = [
+            GamePOV(team=team5, opposition=team4, scored=0, conceded=0, is_home=True)
+        ]
+        team6_game_povs = [
+            GamePOV(team=team6, opposition=team1, scored=0, conceded=0, is_home=False),
+            GamePOV(team=team6, opposition=team3, scored=0, conceded=0, is_home=False)
+        ]
+
+        team1_row = LeagueTableRow(team=team1, game_povs=team1_game_povs)
+        team2_row = LeagueTableRow(team=team2, game_povs=team2_game_povs)
+        team3_row = LeagueTableRow(team=team3, game_povs=team3_game_povs)
+        team4_row = LeagueTableRow(team=team4, game_povs=team4_game_povs)
+        team5_row = LeagueTableRow(team=team5, game_povs=team5_game_povs)
+        team6_row = LeagueTableRow(team=team6, game_povs=team6_game_povs)
+
+        league_table = LeagueTable(
+            [
+                team1_row,
+                team2_row,
+                team3_row,
+                team4_row,
+                team5_row,
+                team6_row
+            ]
+        )
+
+        fixture_difficulties = calculate_fixture_difficulties(league_table)
+
+        self.assertEqual(6, len(fixture_difficulties))
+        self.assertEqual(4, fixture_difficulties[team1_row].average_position)
+        self.assertEqual(2, fixture_difficulties[team2_row].average_position)
+        self.assertEqual(4, fixture_difficulties[team3_row].average_position)
+        self.assertEqual(3, fixture_difficulties[team4_row].average_position)
+        self.assertEqual(4, fixture_difficulties[team5_row].average_position)
+        self.assertEqual(2, fixture_difficulties[team6_row].average_position)
