@@ -45,8 +45,9 @@
         {% load custom_filters %}
         {% for row in league_table.sorted_rows %}
             <tr>
+                {% with team_name=row.team.name %}
                 <td>{{ forloop.counter }}</td>
-                <td>{{ row.team.name }}</td>
+                <td>{{ team_name }}</td>
                 <td>{{ row.games_played }}</td>
                 <td>{{ row.wins }}</td>
                 <td>{{ row.draws }}</td>
@@ -55,7 +56,10 @@
                 <td>{{ row.conceded }}</td>
                 <td>{{ row.goal_difference }}</td>
                 <td>{{ row.points }}</td>
-                <td>{{ fixture_difficulties|get_fixture_difficulty_average_position:row }}</td>
+                <td style="background-color: {{ fixture_difficulty_colours|hash:row }}">
+                    {{ fixture_difficulties|hash:row }}
+                </td>
+                {% endwith %}
             </tr>
         {% endfor %}
     </tbody>

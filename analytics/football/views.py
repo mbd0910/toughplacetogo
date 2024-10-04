@@ -64,10 +64,33 @@ def calculate_traditional_league_table(games):
     league_table = LeagueTable(sorted_league_table_rows)
     fixture_difficulties = calculate_fixture_difficulties(league_table)
 
+    fixture_difficulty_colours = {
+        row: calculate_color(difficulty)
+        for row, difficulty in fixture_difficulties.items()
+    }
+
     return {
         'league_table': league_table,
-        'fixture_difficulties': fixture_difficulties
+        'fixture_difficulties': fixture_difficulties,
+        'fixture_difficulty_colours': fixture_difficulty_colours
     }
+
+def calculate_color(value):
+    # Clamp value to be between -3 and 3
+    clamped_value = max(-3, min(value, 3))
+
+    if clamped_value < 0:
+        # For negative values (harder fixtures), increase red intensity
+        red_intensity = (abs(clamped_value) / 3)  # Scale from 0 to 1
+        green_intensity = 0
+        alpha = red_intensity  # Fully opaque at -3, transparent at 0
+    else:
+        # For positive values (easier fixtures), increase green intensity
+        green_intensity = (clamped_value / 3)  # Scale from 0 to 1
+        red_intensity = 0
+        alpha = green_intensity  # Fully opaque at +3, transparent at 0
+
+    return f'rgba({int(red_intensity * 255)}, {int(green_intensity * 255)}, 0, {alpha})'
 
 
 
