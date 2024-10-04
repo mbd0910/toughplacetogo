@@ -1,5 +1,4 @@
 from datetime import datetime
-from functools import cache
 
 from django.db.models import Count
 

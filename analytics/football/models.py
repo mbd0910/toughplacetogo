@@ -29,6 +29,9 @@ class Country(models.Model):
         verbose_name = 'Country'
         verbose_name_plural = 'Countries'
 
+    def __str__(self):
+        return f'{self.name} - {self.code} [{self.confederation}]'
+
 
 class Venue(models.Model):
     name = models.CharField(max_length=200)
@@ -49,8 +52,8 @@ class Venue(models.Model):
 
 class Team(models.Model):
     name = models.CharField(max_length=200)
-    short_name = models.CharField(max_length=20, null=True)
-    code = models.CharField(max_length=3, null=True)
+    short_name = models.CharField(max_length=20, null=True, blank=True)
+    code = models.CharField(max_length=3, null=True, blank=True)
     gender = models.CharField(max_length=6, choices=Gender.choices())
     team_type = models.CharField(max_length=20, choices=TeamType.choices())
     country = models.ForeignKey(Country, on_delete=models.RESTRICT, related_name='teams')
