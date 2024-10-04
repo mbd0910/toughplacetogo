@@ -24,12 +24,12 @@ def league_table(request, competition_name, season_name):
     )
     games = Game.objects.prefetch_related(game_teams_with_team_prefetch).filter(stage=stage).order_by('kickoff')
 
-    context = calculate_league_table(games)
+    context = calculate_traditional_league_table(games)
 
     return render(request, 'league_table.html', context)
 
 
-def calculate_league_table(games):
+def calculate_traditional_league_table(games):
     rows_by_team_name = {}
 
     def get_league_table_row(team):
