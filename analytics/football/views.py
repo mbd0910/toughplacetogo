@@ -1,10 +1,9 @@
-from datetime import datetime
-
 from django.db.models import Prefetch
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from football.league_table import GamePOV, LeagueTable, LeagueTableRow, calculate_fixture_difficulties
+from football.league_table import GamePOV, LeagueTable, LeagueTableRow, calculate_fixture_difficulties, \
+    normalise_fixture_difficulties
 from football.models import Stage, Game, GameTeam
 
 
@@ -63,15 +62,16 @@ def calculate_traditional_league_table(games):
 
     league_table = LeagueTable(sorted_league_table_rows)
     fixture_difficulties = calculate_fixture_difficulties(league_table)
+    normalised_fixture_difficulties = normalise_fixture_difficulties(fixture_difficulties)
 
     fixture_difficulty_colours = {
         row: calculate_color(difficulty)
-        for row, difficulty in fixture_difficulties.items()
+        for row, difficulty in normalised_fixture_difficulties.items()
     }
 
     return {
         'league_table': league_table,
-        'fixture_difficulties': fixture_difficulties,
+        'fixture_difficulties': normalised_fixture_difficulties,
         'fixture_difficulty_colours': fixture_difficulty_colours
     }
 

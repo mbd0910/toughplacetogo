@@ -100,12 +100,13 @@ def calculate_fixture_difficulties(league_table: LeagueTable) -> Dict[LeagueTabl
     raw_league_position_fixture_difficulties = \
         {row: calculate_fixture_difficulty(row, team_to_position) for row in league_table.sorted_rows}
 
-    raw_difficulties = np.array(list(raw_league_position_fixture_difficulties.values()))
+    return raw_league_position_fixture_difficulties
+
+def normalise_fixture_difficulties(row_to_raw_difficulty: Dict[LeagueTableRow, float]) -> Dict[LeagueTableRow, float]:
+    raw_difficulties = np.array(list(row_to_raw_difficulty.values()))
     normalized_difficulties = zscore(raw_difficulties)
 
-    normalized_fixture_difficulties = {
+    return {
         row: normalized_difficulty
-        for row, normalized_difficulty in zip(raw_league_position_fixture_difficulties.keys(), normalized_difficulties)
+        for row, normalized_difficulty in zip(row_to_raw_difficulty.keys(), normalized_difficulties)
     }
-
-    return normalized_fixture_difficulties
