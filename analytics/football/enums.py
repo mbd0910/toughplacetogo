@@ -2,6 +2,8 @@ from enum import StrEnum
 
 class ExternalSource(StrEnum):
     FOOTBALL_DATA = 'football-data.co.uk'
+    UNDERSTAT = 'Understat'
+    FOT_MOB = 'FotMob'
 
     @classmethod
     def choices(cls):
