@@ -8,22 +8,11 @@ WIP:
 - League Tables always lie. Adding more context to football league tables to give an indication of whether we can trust
 it yet.
 
-## Old Docker instructions
+## Testing
 
-Rebuild and start your containers using Docker Compose and an environment file:
-
-```shell
-docker-compose up --env-file .env --build
+```
+python manage.py test
 ```
 
-Stop and remove containers
-
-```shell
-docker-compose down
-```
-
-with volumes as well
-
-```shell
-docker-compose down -v
-```
+* Uses SQLite for local unit testing
+* Postgres for unit testing via Github actions

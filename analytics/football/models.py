@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from football.enums import CompetitionType, ExternalSource, FantasyFootballProvider, GameStatus as GameStatusEnum, \
@@ -281,21 +283,26 @@ class GameweekGame(models.Model):
             models.UniqueConstraint(fields=['gameweek', 'game'], name='unique_gameweek_game')
         ]
 
-# class GameTeamMetric(models.Model):
-#     game_team = models.ForeignKey(GameTeam, on_delete=models.CASCADE, related_name='game_team_metrics')
-#     metric_type = models.ForeignKey('MetricType', on_delete=models.RESTRICT, related_name='game_team_metrics')
-#     value = models.FloatField()
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-#
-#     class Meta:
-#         db_table = 'game_metrics'
-#
-#
-# class MetricType(models.Model):
-#     name = models.CharField(max_length=200)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-#
-#     class Meta:
-#         db_table = 'metric_types'
+class GameTeamMetric(models.Model):
+    game_team = models.ForeignKey(GameTeam, on_delete=models.CASCADE, related_name='game_team_metrics')
+    source = models.CharField(max_length=200, choices=ExternalSource.choices())
+    xg = models.DecimalField(max_digits=4, decimal_places=2, null=True, validators=[
+        MinValueValidator(0.00),
+        MaxValueValidator(99.99)
+    ])
+    shots = models.IntegerField(null=True)
+    shots_on_target = models.IntegerField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        super().clean()
+        if not (self.xg or self.shots or self.shots_on_target):
+            raise ValidationError('At least one of xg, shots and shots_on_target must be non-null.')
+
+    class Meta:
+        db_table = 'game_team_metrics'
+
+        constraints = [
+            models.UniqueConstraint(fields=['game_team', 'source'], name='unique_game_team_source')
+        ]
