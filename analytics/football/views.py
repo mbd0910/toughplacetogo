@@ -4,25 +4,20 @@ from django.shortcuts import render
 
 from football.league_table import GamePOV, LeagueTable, LeagueTableRow, calculate_fixture_difficulties, \
     normalise_fixture_difficulties
-from football.models import Stage, Game, GameTeam
+from football.models import Stage, Game, GameTeam, GameTeamMetric
 
 
 def index(request):
     return HttpResponse("Hello, world. You're at the analytics index.")
 
 
+# def game_team_metrics_management(request, competition_name, season_name):
+
+
+
 def league_table(request, competition_name, season_name):
-    competition_name = convert_competition_name(competition_name)
-    season_name = convert_season_name(season_name)
-
-    stage = Stage.objects.get(season__name=season_name, season__competition__name=competition_name)
-
-    game_teams_with_team_prefetch = Prefetch(
-        'game_teams',
-        queryset=GameTeam.objects.select_related('team'),
-    )
-    games = Game.objects.prefetch_related(game_teams_with_team_prefetch).filter(stage=stage).order_by('kickoff')
-
+    competition_name, season_name = convert_competition_and_season_names(competition_name, season_name)
+    games = get_games_for_stage(competition_name, season_name)
     context = calculate_traditional_league_table(games)
 
     return render(request, 'league_table.html', context)
@@ -76,7 +71,6 @@ def calculate_traditional_league_table(games):
     }
 
 def calculate_color(value):
-    # Clamp value to be between -3 and 3
     clamped_value = max(-3, min(value, 3))
 
     if clamped_value < 0:
@@ -93,6 +87,8 @@ def calculate_color(value):
     return f'rgba({int(red_intensity * 255)}, {int(green_intensity * 255)}, 0, {alpha})'
 
 
+def convert_competition_and_season_names(competition_name, season_name):
+    return convert_competition_name(competition_name), convert_season_name(season_name)
 
 def convert_competition_name(competition_name):
     match competition_name:
@@ -109,3 +105,19 @@ def convert_competition_name(competition_name):
 
 def convert_season_name(season_name):
     return str.replace(season_name, '-', '/')
+
+def get_games_for_stage(competition_name: str, season_name: str):
+    stage = Stage.objects.get(season__name=season_name, season__competition__name=competition_name)
+
+    game_team_metrics_prefetch = Prefetch(
+        'game_team_metrics',
+        queryset=GameTeamMetric.objects.all()
+    )
+
+    game_teams_with_team_and_metrics_prefetch = Prefetch(
+        'game_teams',
+        queryset=GameTeam.objects.select_related('team').prefetch_related(game_team_metrics_prefetch)
+    )
+    games = Game.objects.prefetch_related(game_teams_with_team_and_metrics_prefetch).filter(stage=stage).order_by('kickoff')
+
+    return games
