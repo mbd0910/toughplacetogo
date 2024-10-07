@@ -11,8 +11,12 @@ def index(request):
     return HttpResponse("Hello, world. You're at the analytics index.")
 
 
-# def game_team_metrics_management(request, competition_name, season_name):
+def metrics_management(request, competition_name, season_name):
+    competition_name, season_name = convert_competition_and_season_names(competition_name, season_name)
+    games = get_games_for_stage(competition_name, season_name)
+    context = metrics_management_context(games)
 
+    return render(request, 'game_team_metrics_management.html', context)
 
 
 def league_table(request, competition_name, season_name):
@@ -69,6 +73,13 @@ def calculate_traditional_league_table(games):
         'fixture_difficulties': normalised_fixture_difficulties,
         'fixture_difficulty_colours': fixture_difficulty_colours
     }
+
+
+def metrics_management_context(games):
+    return {
+        'games': games
+    }
+
 
 def calculate_color(value):
     clamped_value = max(-3, min(value, 3))
