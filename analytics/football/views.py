@@ -1,4 +1,3 @@
-from django.db.models import Prefetch
 from django.http import HttpResponse
 from django.shortcuts import render
 
@@ -120,15 +119,8 @@ def convert_season_name(season_name):
 def get_games_for_stage(competition_name: str, season_name: str):
     stage = Stage.objects.get(season__name=season_name, season__competition__name=competition_name)
 
-    game_team_metrics_prefetch = Prefetch(
-        'game_team_metrics',
-        queryset=GameTeamMetric.objects.all()
-    )
-
-    game_teams_with_team_and_metrics_prefetch = Prefetch(
-        'game_teams',
-        queryset=GameTeam.objects.select_related('team').prefetch_related(game_team_metrics_prefetch)
-    )
-    games = Game.objects.prefetch_related(game_teams_with_team_and_metrics_prefetch).filter(stage=stage).order_by('kickoff')
+    games = Game.objects.filter(stage=stage).prefetch_related(
+        'game_teams__team', 'game_teams__game_team_metrics'
+    ).order_by('kickoff')
 
     return games
