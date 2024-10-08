@@ -7,6 +7,8 @@ from football.league_table import GamePOV, LeagueTable, LeagueTableRow, calculat
     normalise_fixture_difficulties
 from football.models import Stage, Game, GameTeamMetric
 
+from typing import List
+
 
 def index(request):
     return HttpResponse("Hello, world. You're at the analytics index.")
@@ -124,11 +126,21 @@ def calculate_traditional_league_table(games, competition_name, season_name):
     }
 
 
-def metrics_management_context(games, competition_name, season_name):
+def metrics_management_context(games: List[Game], competition_name, season_name):
+    unique_sources = {
+        game_team_metric.source
+        for game in games
+        for game_team in game.game_teams.all()
+        for game_team_metric in game_team.game_team_metrics.all()
+    }
+
+    unique_sources_list = list(unique_sources)
+
     return {
         'games': games,
         'competition_name': competition_name,
-        'season_name': season_name
+        'season_name': season_name,
+        'unique_sources': unique_sources
     }
 
 

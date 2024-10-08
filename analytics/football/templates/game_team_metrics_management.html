@@ -18,28 +18,47 @@
     </style>
 </head>
 <body>
-<h1>Games List</h1>
+<h1>Games List - {{ games|length }}</h1>
 <a href="{% url 'league_table' competition_name season_name %}">League table</a>
 <table>
     <thead>
-    <tr>
-        <th>ID</th>
-        <th>Kickoff</th>
-        <th>Home Team</th>
-        <th>Away Team</th>
-        <th>Home Goals</th>
-        <th>Away Goals</th>
-    </tr>
+        <tr>
+            <th rowspan="2">ID</th>
+            <th rowspan="2">Kickoff</th>
+            <th rowspan="2">Home Team</th>
+            <th rowspan="2">Home Goals</th>
+            <th rowspan="2">Away Goals</th>
+            <th rowspan="2">Away Team</th>
+            {% for source in unique_sources %}
+                <th colspan="3">{{ source }}</th>
+            {% endfor %}
+        </tr>
+        <tr>
+            {% for source in unique_sources %}
+                <th>XG</th>
+                <th>Shots</th>
+                <th>Shots on target</th>
+            {% endfor %}
+        </tr>
     </thead>
     <tbody>
+        {% load custom_filters %}
         {% for game in games %}
             <tr>
                 <td><a href="{% url 'game_view' game.id %}">{{ game.id }}</a></td>
                 <td>{{ game.kickoff }}</td>
                 <td>{{ game.home_team.team.name }}</td>
-                <td>{{ game.away_team.team.name }}</td>
                 <td>{{ game.home_team.full_time_score }}</td>
                 <td>{{ game.away_team.full_time_score }}</td>
+                <td>{{ game.away_team.team.name }}</td>
+                {% for source in unique_sources %}
+                    {% with home_metrics=game.home_team|game_team_metrics:source away_metrics=game.away_team|game_team_metrics:source %}
+                    <td>{% if home_metrics == None %}-{% else %}{{ home_metrics.xg }}{% endif %} | {% if away_metrics == None %}-{% else %}{{ away_metrics.xg }}{% endif %}</td>
+                    <td>{% if home_metrics == None %}-{% else %}{{ home_metrics.shots }}{% endif %} | {% if away_metrics == None %}-{% else %}{{ away_metrics.shots }}{% endif %}</td></td>
+                    <td>{% if home_metrics == None %}-{% else %}{{ home_metrics.shots_on_target }}{% endif %} | {% if away_metrics == None %}-{% else %}{{ away_metrics.shots_on_target }}{% endif %}</td></td>
+                    {% endwith %}
+                {% endfor %}
+
             </tr>
         {% empty %}
             <tr>
