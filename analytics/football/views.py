@@ -13,9 +13,9 @@ def index(request):
 
 
 def metrics_management(request, competition_name, season_name):
-    competition_name, season_name = convert_competition_and_season_names(competition_name, season_name)
-    games = get_games_for_stage(competition_name, season_name)
-    context = metrics_management_context(games)
+    db_competition_name, db_season_name = convert_competition_and_season_names(competition_name, season_name)
+    games = get_games_for_stage(db_competition_name, db_season_name)
+    context = metrics_management_context(games, competition_name, season_name)
 
     return render(request, 'game_team_metrics_management.html', context)
 
@@ -67,14 +67,14 @@ def game_view(request, game_id: int):
 
 
 def league_table(request, competition_name, season_name):
-    competition_name, season_name = convert_competition_and_season_names(competition_name, season_name)
-    games = get_games_for_stage(competition_name, season_name)
-    context = calculate_traditional_league_table(games)
+    db_competition_name, db_season_name = convert_competition_and_season_names(competition_name, season_name)
+    games = get_games_for_stage(db_competition_name, db_season_name)
+    context = calculate_traditional_league_table(games, competition_name, season_name)
 
     return render(request, 'league_table.html', context)
 
 
-def calculate_traditional_league_table(games):
+def calculate_traditional_league_table(games, competition_name, season_name):
     rows_by_team_name = {}
 
     def get_league_table_row(team):
@@ -118,13 +118,17 @@ def calculate_traditional_league_table(games):
     return {
         'league_table': league_table,
         'fixture_difficulties': normalised_fixture_difficulties,
-        'fixture_difficulty_colours': fixture_difficulty_colours
+        'fixture_difficulty_colours': fixture_difficulty_colours,
+        'competition_name': competition_name,
+        'season_name': season_name
     }
 
 
-def metrics_management_context(games):
+def metrics_management_context(games, competition_name, season_name):
     return {
-        'games': games
+        'games': games,
+        'competition_name': competition_name,
+        'season_name': season_name
     }
 
 
