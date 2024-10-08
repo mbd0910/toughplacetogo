@@ -1,9 +1,11 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render, get_object_or_404
 
+from football.enums import ExternalSource
+from football.forms import GameTeamMetricForm
 from football.league_table import GamePOV, LeagueTable, LeagueTableRow, calculate_fixture_difficulties, \
     normalise_fixture_difficulties
-from football.models import Stage, Game, GameTeam, GameTeamMetric
+from football.models import Stage, Game, GameTeamMetric
 
 
 def index(request):
@@ -16,6 +18,46 @@ def metrics_management(request, competition_name, season_name):
     context = metrics_management_context(games)
 
     return render(request, 'game_team_metrics_management.html', context)
+
+
+def game_view(request, game_id: int):
+    game = get_object_or_404(Game, id=game_id)
+    home_team = game.home_team()
+    away_team = game.away_team()
+
+    try:
+        home_team_metrics = home_team.game_team_metrics.get(source=ExternalSource.FOT_MOB)
+    except GameTeamMetric.DoesNotExist:
+        home_team_metrics = GameTeamMetric(game_team=home_team, source=ExternalSource.FOT_MOB)
+
+    try:
+        away_team_metrics = away_team.game_team_metrics.get(source=ExternalSource.FOT_MOB)
+    except GameTeamMetric.DoesNotExist:
+        away_team_metrics = GameTeamMetric(game_team=away_team, source=ExternalSource.FOT_MOB)
+
+    if request.method == 'GET':
+        home_form = GameTeamMetricForm(instance=home_team_metrics, prefix='home', initial={'game_team': home_team})
+        away_form = GameTeamMetricForm(instance=away_team_metrics, prefix='away', initial={'game_team': away_team})
+
+        return render(request, 'game_view.html', {
+            'game': game,
+            'home_form': home_form,
+            'away_form': away_form
+        })
+    elif request.method == 'POST':
+        home_form = GameTeamMetricForm(request.POST, instance=home_team_metrics, prefix='home', initial={'game_team': home_team})
+        away_form = GameTeamMetricForm(request.POST, instance=away_team_metrics, prefix='away', initial={'game_team': away_team})
+
+        if home_form.is_valid() and away_form.is_valid():
+            home_form.save()
+            away_form.save()
+            return redirect(f'/football/game/{game_id}')
+        else:
+            return render(request, 'game_view.html', {
+                'game': game,
+                'home_form': home_form,
+                'away_form': away_form
+            })
 
 
 def league_table(request, competition_name, season_name):

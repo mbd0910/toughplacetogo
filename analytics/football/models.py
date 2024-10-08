@@ -299,6 +299,8 @@ class GameTeamMetric(models.Model):
         super().clean()
         if not (self.xg or self.shots or self.shots_on_target):
             raise ValidationError('At least one of xg, shots and shots_on_target must be non-null.')
+        if self.shots_on_target > self.shots:
+            raise ValidationError('Shots on target cannot be greater than shots.')
 
     class Meta:
         db_table = 'game_team_metrics'

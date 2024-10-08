@@ -1,0 +1,30 @@
+<!-- templates/game_detail.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game Detail</title>
+</head>
+<body>
+<h1>{{ game.name }} - Kickoff: {{ game.kickoff }}</h1>
+<h2>Teams</h2>
+<form method="post">
+    {% csrf_token %}
+    <table>
+        <thead>
+        <tr>
+            <th>Team</th>
+            <th>xG</th>
+            <th>Shots</th>
+            <th>Shots on Target</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+    {{ home_form.as_ul }}
+    {{ away_form.as_ul }}
+    <button type="submit">Save Metrics</button>
+</form>
+</body>
+</html>
