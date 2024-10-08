@@ -36,8 +36,8 @@ def game_view(request, game_id: int):
         away_team_metrics = GameTeamMetric(game_team=away_team, source=ExternalSource.FOT_MOB)
 
     if request.method == 'GET':
-        home_form = GameTeamMetricForm(instance=home_team_metrics, prefix='home', initial={'game_team': home_team})
-        away_form = GameTeamMetricForm(instance=away_team_metrics, prefix='away', initial={'game_team': away_team})
+        home_form = GameTeamMetricForm(instance=home_team_metrics, prefix='home')
+        away_form = GameTeamMetricForm(instance=away_team_metrics, prefix='away')
 
         return render(request, 'game_view.html', {
             'game': game,
@@ -45,8 +45,8 @@ def game_view(request, game_id: int):
             'away_form': away_form
         })
     elif request.method == 'POST':
-        home_form = GameTeamMetricForm(request.POST, instance=home_team_metrics, prefix='home', initial={'game_team': home_team})
-        away_form = GameTeamMetricForm(request.POST, instance=away_team_metrics, prefix='away', initial={'game_team': away_team})
+        home_form = GameTeamMetricForm(request.POST, instance=home_team_metrics, prefix='home')
+        away_form = GameTeamMetricForm(request.POST, instance=away_team_metrics, prefix='away')
 
         if home_form.is_valid() and away_form.is_valid():
             home_form.save()
