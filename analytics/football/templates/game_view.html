@@ -26,5 +26,8 @@
     {{ away_form.as_ul }}
     <button type="submit">Save Metrics</button>
 </form>
+<div>
+    <a href="{% url 'metrics_management' competition_name season_name %}">Back to metrics management</a>
+</div>
 </body>
 </html>

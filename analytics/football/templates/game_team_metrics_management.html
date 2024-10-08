@@ -22,6 +22,7 @@
 <table>
     <thead>
     <tr>
+        <th>ID</th>
         <th>Kickoff</th>
         <th>Home Team</th>
         <th>Away Team</th>
@@ -32,6 +33,7 @@
     <tbody>
         {% for game in games %}
             <tr>
+                <td><a href="{% url 'game_view' game.id %}">{{ game.id }}</a></td>
                 <td>{{ game.kickoff }}</td>
                 <td>{{ game.home_team.team.name }}</td>
                 <td>{{ game.away_team.team.name }}</td>

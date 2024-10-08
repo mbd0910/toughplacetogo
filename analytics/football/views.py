@@ -22,6 +22,8 @@ def metrics_management(request, competition_name, season_name):
 
 def game_view(request, game_id: int):
     game = get_object_or_404(Game, id=game_id)
+    url_season_name = convert_season_name_from_db_to_url(game.stage.season.name)
+    url_competition_name = convert_competition_name_from_db_to_url(game.stage.season.competition.name)
     home_team = game.home_team()
     away_team = game.away_team()
 
@@ -42,7 +44,9 @@ def game_view(request, game_id: int):
         return render(request, 'game_view.html', {
             'game': game,
             'home_form': home_form,
-            'away_form': away_form
+            'away_form': away_form,
+            'season_name': url_season_name,
+            'competition_name': url_competition_name
         })
     elif request.method == 'POST':
         home_form = GameTeamMetricForm(request.POST, instance=home_team_metrics, prefix='home')
@@ -56,7 +60,9 @@ def game_view(request, game_id: int):
             return render(request, 'game_view.html', {
                 'game': game,
                 'home_form': home_form,
-                'away_form': away_form
+                'away_form': away_form,
+                'season_name': url_season_name,
+                'competition_name': url_competition_name
             })
 
 
@@ -140,9 +146,9 @@ def calculate_color(value):
 
 
 def convert_competition_and_season_names(competition_name, season_name):
-    return convert_competition_name(competition_name), convert_season_name(season_name)
+    return convert_competition_name_from_url_to_db(competition_name), convert_season_name_from_url_to_db(season_name)
 
-def convert_competition_name(competition_name):
+def convert_competition_name_from_url_to_db(competition_name):
     match competition_name:
         case 'premier-league':
             return 'Premier League'
@@ -155,8 +161,14 @@ def convert_competition_name(competition_name):
         case _:
             raise NotImplementedError(f'Unknown competition {competition_name}')
 
-def convert_season_name(season_name):
+def convert_competition_name_from_db_to_url(competition_name):
+    return str.lower(competition_name).replace(' ', '-')
+
+def convert_season_name_from_url_to_db(season_name):
     return str.replace(season_name, '-', '/')
+
+def convert_season_name_from_db_to_url(season_name):
+    return str.replace(season_name, '/', '-')
 
 def get_games_for_stage(competition_name: str, season_name: str):
     stage = Stage.objects.get(season__name=season_name, season__competition__name=competition_name)
