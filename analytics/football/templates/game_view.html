@@ -5,7 +5,8 @@
     <title>Game Detail</title>
 </head>
 <body>
-<h1>{{ game.name }} - Kickoff: {{ game.kickoff }}</h1>
+{% load tz %}
+<h1>{{ game.name }} - {{ game.kickoff|timezone:"Europe/London"|date:"j F Y @ H:i" }}</h1>
 <h2>Teams</h2>
 <form method="post">
     {% csrf_token %}
