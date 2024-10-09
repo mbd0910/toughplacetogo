@@ -1,10 +1,9 @@
-<!-- templates/game_detail.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Game Detail</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block title %}Game Detail{% endblock %}
+
+{% block content %}
+
 {% load tz %}
 <h1>{{ game.name }} - {{ game.kickoff|timezone:"Europe/London"|date:"j F Y @ H:i" }}</h1>
 <h2>Teams</h2>
@@ -30,5 +29,4 @@
 <div>
     <a href="{% url 'metrics_management' competition_name season_name %}">Back to metrics management</a>
 </div>
-</body>
-</html>
+{% endblock %}

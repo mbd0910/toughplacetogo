@@ -1,0 +1,30 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tough Place To Go{% endblock %}</title>
+    {% block extra_styles %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'league_table' 'league-one' '2024-2025' %}">League Table</a></li>
+                <li><a href="{% url 'metrics_management' 'league-one' '2024-2025' %}">Metrics Management</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        <!-- Page specific content will go here -->
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2024 My Django Site</p>
+    </footer>
+</body>
+</html>
