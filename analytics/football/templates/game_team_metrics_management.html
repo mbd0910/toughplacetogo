@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<div class="flex flex-col items-cetner mx-10 md:mx-20">
+<div class="flex flex-col items-center mx-10 md:mx-20">
     <h1 class="prose-2xl mb-4">Games List - {{ games|length }}</h1>
     <a href="{% url 'league_table' competition_name season_name %}" class="link link-primary">League table</a>
     <table class="table table-zebra table-lg">
