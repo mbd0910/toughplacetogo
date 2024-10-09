@@ -4,56 +4,58 @@
 
 {% block content %}
 
-<h1>Games List - {{ games|length }}</h1>
-<a href="{% url 'league_table' competition_name season_name %}" class="link link-primary">League table</a>
-<table class="table table-zebra table-lg">
-    <thead>
-        <tr>
-            <th rowspan="2">ID</th>
-            <th rowspan="2">Date</th>
-            <th rowspan="2">Kickoff</th>
-            <th rowspan="2">Home Team</th>
-            <th rowspan="2">Scoreline</th>
-            <th rowspan="2">Away Team</th>
-            {% for source in unique_sources %}
-                <th colspan="3">{{ source }}</th>
-            {% endfor %}
-        </tr>
-        <tr>
-            {% for source in unique_sources %}
-                <th>XG</th>
-                <th>Shots</th>
-                <th>Shots on target</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% load custom_filters %}
-        {% load tz %}
-        {% for game in games %}
+<div class="flex flex-col items-cetner mx-10 md:mx-20">
+    <h1 class="prose-2xl mb-4">Games List - {{ games|length }}</h1>
+    <a href="{% url 'league_table' competition_name season_name %}" class="link link-primary">League table</a>
+    <table class="table table-zebra table-lg">
+        <thead>
             <tr>
-                <td><a href="{% url 'game_view' game.id %}" class="link link-primary">{{ game.id }}</a></td>
-                <td>{{ game.kickoff|timezone:"Europe/London"|date:"j F Y" }}</td>
-                <td>{{ game.kickoff|timezone:"Europe/London"|date:"H:i" }}</td>
-                <td>{{ game.home_team.team.name }}</td>
-                <td>{{ game.home_team.full_time_score }} - {{ game.away_team.full_time_score }}</td>
-                <td>{{ game.away_team.team.name }}</td>
+                <th rowspan="2">ID</th>
+                <th rowspan="2">Date</th>
+                <th rowspan="2">Kickoff</th>
+                <th rowspan="2">Home Team</th>
+                <th rowspan="2">Scoreline</th>
+                <th rowspan="2">Away Team</th>
                 {% for source in unique_sources %}
-                    {% with home_metrics=game.home_team|game_team_metrics:source away_metrics=game.away_team|game_team_metrics:source %}
-                    <td>{% if home_metrics == None %}-{% else %}{{ home_metrics.xg }}{% endif %} | {% if away_metrics == None %}-{% else %}{{ away_metrics.xg }}{% endif %}</td>
-                    <td>{% if home_metrics == None %}-{% else %}{{ home_metrics.shots }}{% endif %} | {% if away_metrics == None %}-{% else %}{{ away_metrics.shots }}{% endif %}</td></td>
-                    <td>{% if home_metrics == None %}-{% else %}{{ home_metrics.shots_on_target }}{% endif %} | {% if away_metrics == None %}-{% else %}{{ away_metrics.shots_on_target }}{% endif %}</td></td>
-                    {% endwith %}
+                    <th colspan="3">{{ source }}</th>
                 {% endfor %}
-
             </tr>
-        {% empty %}
             <tr>
-                <td colspan="5">No games found for this season.</td>
+                {% for source in unique_sources %}
+                    <th>XG</th>
+                    <th>Shots</th>
+                    <th>Shots on target</th>
+                {% endfor %}
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% load custom_filters %}
+            {% load tz %}
+            {% for game in games %}
+                <tr>
+                    <td><a href="{% url 'game_view' game.id %}" class="link link-primary">{{ game.id }}</a></td>
+                    <td>{{ game.kickoff|timezone:"Europe/London"|date:"j F Y" }}</td>
+                    <td>{{ game.kickoff|timezone:"Europe/London"|date:"H:i" }}</td>
+                    <td>{{ game.home_team.team.name }}</td>
+                    <td>{{ game.home_team.full_time_score }} - {{ game.away_team.full_time_score }}</td>
+                    <td>{{ game.away_team.team.name }}</td>
+                    {% for source in unique_sources %}
+                        {% with home_metrics=game.home_team|game_team_metrics:source away_metrics=game.away_team|game_team_metrics:source %}
+                        <td>{% if home_metrics == None %}-{% else %}{{ home_metrics.xg }}{% endif %} | {% if away_metrics == None %}-{% else %}{{ away_metrics.xg }}{% endif %}</td>
+                        <td>{% if home_metrics == None %}-{% else %}{{ home_metrics.shots }}{% endif %} | {% if away_metrics == None %}-{% else %}{{ away_metrics.shots }}{% endif %}</td></td>
+                        <td>{% if home_metrics == None %}-{% else %}{{ home_metrics.shots_on_target }}{% endif %} | {% if away_metrics == None %}-{% else %}{{ away_metrics.shots_on_target }}{% endif %}</td></td>
+                        {% endwith %}
+                    {% endfor %}
+
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No games found for this season.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
 
 {% block extra_styles %}
