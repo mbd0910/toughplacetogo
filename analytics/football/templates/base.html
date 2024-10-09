@@ -11,11 +11,41 @@
 </head>
 <body>
     <header>
-        <nav>
-            <ul>
-                <li><a href="{% url 'league_table' 'league-one' '2024-2025' %}">League Table</a></li>
-                <li><a href="{% url 'metrics_management' 'league-one' '2024-2025' %}">Metrics Management</a></li>
-            </ul>
+        <nav class="navbar justify-center bg-base-300">
+            <a class="btn btn-ghost text-lg">
+                TPTG
+            </a>
+        </nav>
+
+        <nav class="flex justify-center bg-base-200">
+            <div class="menu menu-horizontal justify-center gap-2">
+                <div class="dropdown dropdown-end">
+                    <button class="btn btn-ghost btn-sm">
+                        League Tables
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+
+                    <ul tabindex="0" class="dropdown-content menu z-[1] bg-base-200 p-6 rounded-box shadow w-56 gap-2">
+                        <li><a href="{% url 'league_table' 'premier-league' '2024-2025' %}">Premier League</a></li>
+                        <li><a href="{% url 'league_table' 'championship' '2024-2025' %}">Championship</a></li>
+                        <li><a href="{% url 'league_table' 'league-one' '2024-2025' %}">League One</a></li>
+                        <li><a href="{% url 'league_table' 'league-two' '2024-2025' %}">League Two</a></li>
+                    </ul>
+                </div>
+                <div class="dropdown dropdown-end">
+                    <button class="btn btn-ghost btn-sm">
+                        Metrics Management
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+
+                    <ul tabindex="0" class="dropdown-content menu z-[1] bg-base-200 p-6 rounded-box shadow w-56 gap-2">
+                        <li><a href="{% url 'metrics_management' 'premier-league' '2024-2025' %}">Premier League</a></li>
+                        <li><a href="{% url 'metrics_management' 'championship' '2024-2025' %}">Championship</a></li>
+                        <li><a href="{% url 'metrics_management' 'league-one' '2024-2025' %}">League One</a></li>
+                        <li><a href="{% url 'metrics_management' 'league-two' '2024-2025' %}">League Two</a></li>
+                    </ul>
+                </div>
+            </div>
         </nav>
     </header>
 
