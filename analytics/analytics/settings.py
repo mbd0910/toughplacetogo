@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'football.apps.FootballConfig',
     'debug_toolbar',
+    'widget_tweaks'
 ]
 
 MIDDLEWARE = [

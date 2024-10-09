@@ -5,26 +5,40 @@
 {% block content %}
 
 {% load tz %}
+{% load widget_tweaks %}
 <h1>{{ game.name }} - {{ game.kickoff|timezone:"Europe/London"|date:"j F Y @ H:i" }}</h1>
-<h2>Teams</h2>
 <form method="post">
     {% csrf_token %}
-    <table>
-        <thead>
-        <tr>
-            <th>Team</th>
-            <th>xG</th>
-            <th>Shots</th>
-            <th>Shots on Target</th>
-        </tr>
-        </thead>
-        <tbody>
-
-        </tbody>
-    </table>
-    {{ home_form.as_ul }}
-    {{ away_form.as_ul }}
-    <button type="submit">Save Metrics</button>
+    <div class="form-control">
+        <label>Home XG</label>
+        {% render_field home_form.xg class="input input-bordered max-w-xs" %}
+    </div>
+    <div class="form-control">
+        <label>Home Shots</label>
+        {% render_field home_form.shots class="input input-bordered max-w-xs" %}
+    </div>
+    <div class="form-control">
+        <label>Home Shots on target</label>
+        {% render_field home_form.shots_on_target class="input input-bordered max-w-xs" %}
+    </div>
+    {{ home_form.source.as_hidden }}
+    {{ home_form.game_team.as_hidden }}
+    {{ form.field.as_hidden }}
+    <div class="form-control">
+        <label>Away XG</label>
+        {% render_field away_form.xg class="input input-bordered max-w-xs" %}
+    </div>
+    <div class="form-control">
+        <label>Away Shots</label>
+        {% render_field away_form.shots class="input input-bordered max-w-xs" %}
+    </div>
+    <div class="form-control">
+        <label>Away Shots on target</label>
+        {% render_field away_form.shots_on_target class="input input-bordered max-w-xs" %}
+    </div>
+    {{ away_form.source.as_hidden }}
+    {{ away_form.game_team.as_hidden }}
+    <button type="submit" class="btn btn-primary mt-2">Submit</button>
 </form>
 <div>
     <a href="{% url 'metrics_management' competition_name season_name %}">Back to metrics management</a>

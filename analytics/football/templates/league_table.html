@@ -39,7 +39,7 @@
                     <td>{{ row.goal_difference }}</td>
                     <td>{{ row.points }}</td>
                     <td style="background-color: {{ fixture_difficulty_colours|hash:row }}">
-                        {{ fixture_difficulties|hash:row }}
+                        {{ fixture_difficulties|hash:row|floatformat:"3" }}
                     </td>
                     {% endwith %}
                 </tr>
