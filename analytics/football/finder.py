@@ -35,6 +35,14 @@ def find_team(value: str,
         return None
 
 
+def guess_team(team_name: str):
+    team = Team.objects.filter(name=team_name).first()
+
+    if not team:
+        team = Team.objects.filter(short_name=team_name).first()
+
+    return team
+
 
 class CachingTeamFinder:
     def __init__(self):
