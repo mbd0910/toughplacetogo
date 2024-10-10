@@ -3,7 +3,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from football.enums import CompetitionType, ExternalSource, FantasyFootballProvider, GameStatus as GameStatusEnum, \
-    GameweekType, Gender, TeamExternalLinkType, TeamType
+    GameweekType, Gender, GameExternalLinkType, TeamExternalLinkType, TeamType
 
 
 class Confederation(models.Model):
@@ -168,6 +168,24 @@ class Game(models.Model):
 
     class Meta:
         db_table = 'games'
+
+
+class GameExternalLink(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='external_links')
+    source = models.CharField(max_length=200, choices=ExternalSource.choices())
+    external_link_type = models.CharField(max_length=20, choices=GameExternalLinkType.choices(), null=True)
+    value = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'game_external_links'
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=['game', 'external_link_type', 'source', 'value'], name='unique_game_type_source_value'
+            )
+        ]
 
 
 class GameStatus(models.Model):
