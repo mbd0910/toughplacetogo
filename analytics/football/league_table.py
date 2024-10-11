@@ -24,6 +24,9 @@ class LeagueTableRow:
         self.scored = 0
         self.conceded = 0
         self.game_povs = game_povs
+        self.xg = 0
+        self.xg_against = 0
+        self.x_points = 0
 
     def games_played(self):
         return self.wins + self.draws + self.losses

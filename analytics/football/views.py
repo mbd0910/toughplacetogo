@@ -16,7 +16,7 @@ def index(request):
 
 def metrics_management(request, competition_name, season_name):
     db_competition_name, db_season_name = convert_competition_and_season_names(competition_name, season_name)
-    games = get_games_for_stage(db_competition_name, db_season_name)
+    stage, games = get_games_for_stage(db_competition_name, db_season_name)
     context = metrics_management_context(games, competition_name, season_name)
 
     return render(request, 'game_team_metrics_management.html', context)
@@ -70,13 +70,13 @@ def game_view(request, game_id: int):
 
 def league_table(request, competition_name, season_name):
     db_competition_name, db_season_name = convert_competition_and_season_names(competition_name, season_name)
-    games = get_games_for_stage(db_competition_name, db_season_name)
-    context = calculate_traditional_league_table(games, competition_name, season_name)
+    stage, games = get_games_for_stage(db_competition_name, db_season_name)
+    context = calculate_traditional_league_table(stage, games, competition_name, season_name)
 
     return render(request, 'league_table.html', context)
 
 
-def calculate_traditional_league_table(games, competition_name, season_name):
+def calculate_traditional_league_table(stage, games, competition_name, season_name):
     rows_by_team_name = {}
 
     def get_league_table_row(team):
@@ -101,6 +101,12 @@ def calculate_traditional_league_table(games, competition_name, season_name):
 
         home_team_row.add_game_pov(home_game_pov)
         away_team_row.add_game_pov(away_game_pov)
+
+    for team_metrics in stage.team_metrics.all():
+        team_row = get_league_table_row(team_metrics.team)
+        team_row.xg = team_metrics.xg
+        team_row.xg_against = team_metrics.xg_against
+        team_row.x_points = team_metrics.x_points
 
     sorted_league_table_rows = sorted(
         rows_by_team_name.values(),
@@ -187,10 +193,12 @@ def convert_season_name_from_db_to_url(season_name):
     return str.replace(season_name, '/', '-')
 
 def get_games_for_stage(competition_name: str, season_name: str):
-    stage = Stage.objects.get(season__name=season_name, season__competition__name=competition_name)
+    stage = Stage.objects.get(
+        season__name=season_name, season__competition__name=competition_name
+    )
 
     games = Game.objects.filter(stage=stage).prefetch_related(
         'game_teams__team', 'game_teams__game_team_metrics'
     ).order_by('kickoff')
 
-    return games
+    return stage, games

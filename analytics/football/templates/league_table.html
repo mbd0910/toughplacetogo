@@ -10,16 +10,19 @@
     <table class="table table-zebra table-lg">
         <thead>
             <tr>
-                <th rowspan="2">Position</th>
-                <th rowspan="2">Team</th>
-                <th rowspan="2">Played</th>
-                <th rowspan="2">Wins</th>
-                <th rowspan="2">Draws</th>
-                <th rowspan="2">Losses</th>
-                <th rowspan="2">Scored</th>
-                <th rowspan="2">Conceded</th>
-                <th rowspan="2">Goal Difference</th>
-                <th rowspan="2">Points</th>
+                <th rowspan="2"></th>
+                <th rowspan="2"></th>
+                <th rowspan="2">P</th>
+                <th rowspan="2">W</th>
+                <th rowspan="2">D</th>
+                <th rowspan="2">L</th>
+                <th rowspan="2">F</th>
+                <th rowspan="2">A</th>
+                <th rowspan="2">GD</th>
+                <th rowspan="2">Pts</th>
+                <th rowspan="2">xG</th>
+                <th rowspan="2">xGA</th>
+                <th rowspan="2">xPoints</th>
                 <th>Fixture Difficulty</th>
             </tr>
             <tr>
@@ -41,6 +44,9 @@
                     <td>{{ row.conceded }}</td>
                     <td>{{ row.goal_difference }}</td>
                     <td>{{ row.points }}</td>
+                    <td>{{ row.xg }}</td>
+                    <td>{{ row.xg_against }}</td>
+                    <td>{{ row.x_points }}</td>
                     <td style="background-color: {{ fixture_difficulty_colours|hash:row }}">
                         {{ fixture_difficulties|hash:row|floatformat:"3" }}
                     </td>
