@@ -1,6 +1,12 @@
 from django.contrib import admin
 
-from football.models import Confederation, Country, Game, GameTeam, Team, TeamExternalLink
+from football.models import Competition, CompetitionExternalLink, Confederation, Country, Game, GameTeam, Team, TeamExternalLink
+
+class CompetitionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'gender', 'competition_type', 'country', 'confederation')
+
+class CompetitionExternalLinkAdmin(admin.ModelAdmin):
+    list_display = ('competition', 'source', 'external_link_type', 'value')
 
 class ConfederationAdmin(admin.ModelAdmin):
     list_display = ('code', 'name')
@@ -26,6 +32,8 @@ class TeamExternalLinkAdmin(admin.ModelAdmin):
     list_display = ('team', 'source', 'external_link_type', 'value')
     ordering = ['team', 'source', 'external_link_type', 'value']
 
+admin.site.register(Competition, CompetitionAdmin)
+admin.site.register(CompetitionExternalLink, CompetitionExternalLinkAdmin)
 admin.site.register(Confederation, ConfederationAdmin)
 admin.site.register(Country, CountryAdmin)
 admin.site.register(Game, GameAdmin)

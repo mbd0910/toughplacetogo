@@ -110,6 +110,9 @@ class Competition(models.Model):
             models.UniqueConstraint(fields=['name', 'gender', 'country'], name='unique_competition_name_gender_country')
         ]
 
+    def __str__(self):
+        return self.name
+
 class CompetitionExternalLink(models.Model):
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE, related_name='external_links')
     source = models.CharField(max_length=200, choices=ExternalSource.choices())
