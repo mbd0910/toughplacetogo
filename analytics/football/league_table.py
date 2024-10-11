@@ -37,6 +37,9 @@ class LeagueTableRow:
     def goal_difference(self):
         return self.scored - self.conceded
 
+    def xg_difference(self):
+        return self.xg - self.xg_against
+
     def add_game_pov(self, game_pov: GamePOV):
         self.game_povs.append(game_pov)
         goals_scored = game_pov.scored
@@ -83,13 +86,6 @@ class LeagueTable:
         return "\n".join(row.__str__() for row in self.sorted_rows)
 
 
-class FixtureDifficulty:
-    def __init__(self, average_position):
-        self.average_position = average_position
-
-    def __str__(self):
-        return f'Average position of opponent is {self.average_position}'
-
 def calculate_fixture_difficulty(row: LeagueTableRow, team_to_position: Dict[Team, int]):
     team_position = team_to_position[row.team]
     positions = [
@@ -98,18 +94,18 @@ def calculate_fixture_difficulty(row: LeagueTableRow, team_to_position: Dict[Tea
     ]
     return mean(positions) if positions else None
 
-def calculate_fixture_difficulties(league_table: LeagueTable) -> Dict[LeagueTableRow, float]:
+def calculate_fixture_difficulties(league_table: LeagueTable) -> Dict[Team, float]:
     team_to_position = league_table.team_to_position()
     raw_league_position_fixture_difficulties = \
-        {row: calculate_fixture_difficulty(row, team_to_position) for row in league_table.sorted_rows}
+        {row.team: calculate_fixture_difficulty(row, team_to_position) for row in league_table.sorted_rows}
 
     return raw_league_position_fixture_difficulties
 
-def normalise_fixture_difficulties(row_to_raw_difficulty: Dict[LeagueTableRow, float]) -> Dict[LeagueTableRow, float]:
-    raw_difficulties = np.array(list(row_to_raw_difficulty.values()))
+def normalise_fixture_difficulties(team_to_raw_difficulty: Dict[Team, float]) -> Dict[Team, float]:
+    raw_difficulties = np.array(list(team_to_raw_difficulty.values()))
     normalized_difficulties = zscore(raw_difficulties)
 
     return {
-        row: normalized_difficulty
-        for row, normalized_difficulty in zip(row_to_raw_difficulty.keys(), normalized_difficulties)
+        team: normalized_difficulty
+        for team, normalized_difficulty in zip(team_to_raw_difficulty.keys(), normalized_difficulties)
     }

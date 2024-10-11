@@ -27,6 +27,7 @@
             </tr>
             <tr>
                 <th>League Position</th>
+                <th>X Points</th>
             </tr>
         </thead>
         <tbody>
@@ -47,9 +48,16 @@
                     <td>{{ row.xg }}</td>
                     <td>{{ row.xg_against }}</td>
                     <td>{{ row.x_points }}</td>
-                    <td style="background-color: {{ fixture_difficulty_colours|hash:row }}">
-                        {{ fixture_difficulties|hash:row|floatformat:"3" }}
+                    {% with traditional_fixture_difficulty=fixture_difficulties.traditional|hash:row.team %}
+                    <td style="background-color: {{ traditional_fixture_difficulty|fixture_difficulty_colour }}">
+                        {{ traditional_fixture_difficulty|floatformat:"3" }}
                     </td>
+                    {% endwith %}
+                    {% with x_points_fixture_difficulty=fixture_difficulties.x_points|hash:row.team %}
+                    <td style="background-color: {{ x_points_fixture_difficulty|fixture_difficulty_colour }}">
+                        {{ fixture_difficulties.x_points|hash:row.team|floatformat:"3" }}
+                    </td>
+                    {% endwith %}
                     {% endwith %}
                 </tr>
             {% endfor %}

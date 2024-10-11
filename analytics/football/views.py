@@ -108,29 +108,37 @@ def calculate_traditional_league_table(stage, games, competition_name, season_na
         team_row.xg_against = team_metrics.xg_against
         team_row.x_points = team_metrics.x_points
 
-    sorted_league_table_rows = sorted(
+    rows_sorted_by_points = sorted(
         rows_by_team_name.values(),
         key=lambda row: (row.points(), row.goal_difference(), row.scored, row.team.name),
         reverse=True
     )
 
-    league_table = LeagueTable(sorted_league_table_rows)
-    fixture_difficulties = calculate_fixture_difficulties(league_table)
-    normalised_fixture_difficulties = normalise_fixture_difficulties(fixture_difficulties)
+    rows_sorted_by_x_points = sorted(
+        rows_by_team_name.values(),
+        key=lambda row: (row.x_points, row.xg_difference()),
+        reverse=True
+    )
 
-    fixture_difficulty_colours = {
-        row: calculate_color(difficulty)
-        for row, difficulty in normalised_fixture_difficulties.items()
-    }
+    traditional_league_table, traditional_fixture_difficulties = calculate_league_table_and_fixture_difficulties(rows_sorted_by_points)
+    x_points_league_table, x_points_normalised_difficulties = calculate_league_table_and_fixture_difficulties(rows_sorted_by_x_points)
 
     return {
-        'league_table': league_table,
-        'fixture_difficulties': normalised_fixture_difficulties,
-        'fixture_difficulty_colours': fixture_difficulty_colours,
+        'league_table': traditional_league_table,
+        'fixture_difficulties': {
+            'traditional': traditional_fixture_difficulties,
+            'x_points': x_points_normalised_difficulties,
+        },
         'competition_name': competition_name,
         'season_name': season_name
     }
 
+def calculate_league_table_and_fixture_difficulties(sorted_rows):
+    league_table = LeagueTable(sorted_rows)
+    fixture_difficulties = calculate_fixture_difficulties(league_table)
+    normalised_fixture_difficulties = normalise_fixture_difficulties(fixture_difficulties)
+
+    return league_table, normalised_fixture_difficulties
 
 def metrics_management_context(games: List[Game], competition_name, season_name):
     unique_sources = {
@@ -148,23 +156,6 @@ def metrics_management_context(games: List[Game], competition_name, season_name)
         'season_name': season_name,
         'unique_sources': unique_sources
     }
-
-
-def calculate_color(value):
-    clamped_value = max(-3, min(value, 3))
-
-    if clamped_value < 0:
-        # For negative values (harder fixtures), increase red intensity
-        red_intensity = (abs(clamped_value) / 3)  # Scale from 0 to 1
-        green_intensity = 0
-        alpha = red_intensity  # Fully opaque at -3, transparent at 0
-    else:
-        # For positive values (easier fixtures), increase green intensity
-        green_intensity = (clamped_value / 3)  # Scale from 0 to 1
-        red_intensity = 0
-        alpha = green_intensity  # Fully opaque at +3, transparent at 0
-
-    return f'rgba({int(red_intensity * 255)}, {int(green_intensity * 255)}, 0, {alpha})'
 
 
 def convert_competition_and_season_names(competition_name, season_name):
