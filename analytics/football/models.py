@@ -326,3 +326,36 @@ class GameTeamMetric(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['game_team', 'source'], name='unique_game_team_source')
         ]
+
+
+class StageTeamMetric(models.Model):
+    stage = models.ForeignKey(Stage, on_delete=models.RESTRICT, related_name='team_metrics')
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='stage_metrics')
+    source = models.CharField(max_length=200, choices=ExternalSource.choices())
+    xg = models.DecimalField(max_digits=5, decimal_places=2, null=True, validators=[
+        MinValueValidator(0.00),
+        MaxValueValidator(999.99)
+    ])
+    xg_against = models.DecimalField(max_digits=5, decimal_places=2, null=True, validators=[
+        MinValueValidator(0.00),
+        MaxValueValidator(999.99)
+    ])
+    x_points = models.DecimalField(max_digits=5, decimal_places=2, null=True, validators=[
+        MinValueValidator(0.00),
+        MaxValueValidator(999.99)
+    ])
+    points = models.IntegerField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        super().clean()
+        if not (self.xg or self.xg_against or self.x_points or self.points):
+            raise ValidationError('At least one of xg, xg_against, x_points and points must be non-null.')
+
+    class Meta:
+        db_table = 'stage_team_metrics'
+
+        constraints = [
+            models.UniqueConstraint(fields=['stage', 'team', 'source'], name='unique_stage_team_source')
+        ]
