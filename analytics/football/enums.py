@@ -50,6 +50,13 @@ class GameExternalLinkType(StrEnum):
     def choices(cls):
         return [(key.value, key.name) for key in cls]
 
+class CompetitionExternalLinkType(StrEnum):
+    ID = 'id'
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
+
 class GameStatus(StrEnum):
     FINISHED = 'finished'
     ABANDONED = 'abandoned'
