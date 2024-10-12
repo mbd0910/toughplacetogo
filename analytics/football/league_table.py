@@ -14,12 +14,13 @@ class GamePOV:
 
 
 class LeagueTableRow:
-    def __init__(self, team: Team, game_povs=None):
+    def __init__(self, team: Team, points_deduction=0, game_povs=None, wins=0, draws=0):
         if game_povs is None:
             game_povs = []
         self.team = team
-        self.wins = 0
-        self.draws = 0
+        self.points_deduction = points_deduction
+        self.wins = wins
+        self.draws = draws
         self.losses = 0
         self.scored = 0
         self.conceded = 0
@@ -32,6 +33,12 @@ class LeagueTableRow:
         return self.wins + self.draws + self.losses
 
     def points(self):
+        return self.performance_points() - self.points_deduction
+
+    def has_points_deducted(self):
+        return self.points_deduction > 0
+
+    def performance_points(self):
         return 3 * self.wins + self.draws
 
     def goal_difference(self):

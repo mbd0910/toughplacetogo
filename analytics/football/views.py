@@ -5,7 +5,7 @@ from football.enums import ExternalSource
 from football.forms import GameTeamMetricForm
 from football.league_table import GamePOV, LeagueTable, LeagueTableRow, calculate_fixture_difficulties, \
     normalise_fixture_difficulties
-from football.models import Stage, Game, GameTeamMetric
+from football.models import Stage, StagePointsDeduction, Game, GameTeamMetric
 
 from typing import List
 
@@ -79,10 +79,14 @@ def league_table(request, competition_name, season_name):
 def calculate_traditional_league_table(stage, games, competition_name, season_name):
     rows_by_team_name = {}
 
+    points_deductions = StagePointsDeduction.objects.filter(stage=stage)
+    points_deduction_by_team = { points_deduction.team: points_deduction.deduction for points_deduction in points_deductions }
+
     def get_league_table_row(team):
         team_name = team.name
         if team_name not in rows_by_team_name:
-            rows_by_team_name[team_name] = LeagueTableRow(team)
+            points_deduction = points_deduction_by_team[team] if team in points_deduction_by_team else 0
+            rows_by_team_name[team_name] = LeagueTableRow(team=team, points_deduction=points_deduction)
         return rows_by_team_name[team_name]
 
     for game in games:
@@ -108,6 +112,12 @@ def calculate_traditional_league_table(stage, games, competition_name, season_na
         team_row.xg_against = team_metrics.xg_against
         team_row.x_points = team_metrics.x_points
 
+    rows_sorted_by_performance_points = sorted(
+        rows_by_team_name.values(),
+        key=lambda row: (row.performance_points(), row.goal_difference(), row.scored, row.team.name),
+        reverse=True
+    )
+
     rows_sorted_by_points = sorted(
         rows_by_team_name.values(),
         key=lambda row: (row.points(), row.goal_difference(), row.scored, row.team.name),
@@ -120,13 +130,14 @@ def calculate_traditional_league_table(stage, games, competition_name, season_na
         reverse=True
     )
 
-    traditional_league_table, traditional_fixture_difficulties = calculate_league_table_and_fixture_difficulties(rows_sorted_by_points)
-    x_points_league_table, x_points_normalised_difficulties = calculate_league_table_and_fixture_difficulties(rows_sorted_by_x_points)
+    traditional_league_table = LeagueTable(rows_sorted_by_points)
+    performance_points_fixture_difficulties = calculate_league_table_and_fixture_difficulties(rows_sorted_by_performance_points)
+    x_points_normalised_difficulties = calculate_league_table_and_fixture_difficulties(rows_sorted_by_x_points)
 
     return {
         'league_table': traditional_league_table,
         'fixture_difficulties': {
-            'traditional': traditional_fixture_difficulties,
+            'traditional': performance_points_fixture_difficulties,
             'x_points': x_points_normalised_difficulties,
         },
         'competition_name': competition_name,
@@ -138,7 +149,7 @@ def calculate_league_table_and_fixture_difficulties(sorted_rows):
     fixture_difficulties = calculate_fixture_difficulties(league_table)
     normalised_fixture_difficulties = normalise_fixture_difficulties(fixture_difficulties)
 
-    return league_table, normalised_fixture_difficulties
+    return normalised_fixture_difficulties
 
 def metrics_management_context(games: List[Game], competition_name, season_name):
     unique_sources = {
