@@ -44,7 +44,7 @@
                     <td>{{ row.scored }}</td>
                     <td>{{ row.conceded }}</td>
                     <td>{{ row.goal_difference }}</td>
-                    <td>{{ row.points }}</td>
+                    <td>{{ row.points }}{% if row.has_points_deducted %}*{% endif %}</td>
                     <td>{{ row.xg }}</td>
                     <td>{{ row.xg_against }}</td>
                     <td>{{ row.x_points }}</td>

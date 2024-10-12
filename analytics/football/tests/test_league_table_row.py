@@ -124,7 +124,7 @@ class LeagueTableRowTestCase(TestCase):
     def test_most_recent_away_games(self):
         """Finds most recent X away games"""
         charlton = Team(name='Charlton')
-        league_table_row = LeagueTableRow(Team(name='Charlton'))
+        league_table_row = LeagueTableRow(charlton)
         self.assertEqual(league_table_row.most_recent_away_games(), [])
 
         opposition1 = Team(name='Opposition 1')
@@ -160,3 +160,21 @@ class LeagueTableRowTestCase(TestCase):
         self.assertNotIn(game_pov5, most_recent_away_games)
         self.assertIn(game_pov4, most_recent_away_games)
         self.assertIn(game_pov6, most_recent_away_games)
+
+    def test_has_points_deducted_yes(self):
+        league_table_row = LeagueTableRow(Team(name='Charlton'), points_deduction=2)
+        self.assertTrue(league_table_row.has_points_deducted())
+
+    def test_has_points_deducted_no(self):
+        league_table_row = LeagueTableRow(Team(name='Charlton'), points_deduction=0)
+        self.assertFalse(league_table_row.has_points_deducted())
+
+    def test_points_with_points_deduction(self):
+        league_table_row = LeagueTableRow(Team(name='Charlton'), points_deduction=16, wins=2, draws=1)
+        self.assertEqual(-9, league_table_row.points())
+        self.assertEqual(7, league_table_row.performance_points())
+
+    def test_points_with_no_points_deduction(self):
+        league_table_row = LeagueTableRow(Team(name='Charlton'), points_deduction=0, wins=4, draws=2)
+        self.assertEqual(14, league_table_row.points())
+        self.assertEqual(14, league_table_row.performance_points())
