@@ -9,6 +9,12 @@ def hash(h, key):
     return h[key]
 
 @register.filter
+def hash_default_zero(h, key):
+    if key in h:
+        return h[key]
+    return 0
+
+@register.filter
 def game_team_metrics(game_team: GameTeam, source):
     for gtm in game_team.game_team_metrics.all():
         if gtm.source == source:

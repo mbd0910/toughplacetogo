@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'football.apps.FootballConfig',
     'debug_toolbar',
     'widget_tweaks',
-    'fontawesomefree'
+    'fontawesomefree',
+    'mathfilters'
 ]
 
 MIDDLEWARE = [

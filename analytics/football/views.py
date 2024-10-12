@@ -5,7 +5,7 @@ from football.enums import ExternalSource
 from football.forms import GameTeamMetricForm
 from football.league_table import GamePOV, LeagueTable, LeagueTableRow, calculate_fixture_difficulties, \
     normalise_fixture_difficulties
-from football.models import Stage, Game, GameTeamMetric
+from football.models import Stage, StagePointsDeduction, Game, GameTeamMetric
 
 from typing import List
 
@@ -123,6 +123,10 @@ def calculate_traditional_league_table(stage, games, competition_name, season_na
     traditional_league_table, traditional_fixture_difficulties = calculate_league_table_and_fixture_difficulties(rows_sorted_by_points)
     x_points_league_table, x_points_normalised_difficulties = calculate_league_table_and_fixture_difficulties(rows_sorted_by_x_points)
 
+    points_deductions = StagePointsDeduction.objects.filter(stage=stage)
+    points_deductions_by_team = \
+        {points_deduction.team: points_deduction.deduction for points_deduction in points_deductions}
+
     return {
         'league_table': traditional_league_table,
         'fixture_difficulties': {
@@ -130,7 +134,8 @@ def calculate_traditional_league_table(stage, games, competition_name, season_na
             'x_points': x_points_normalised_difficulties,
         },
         'competition_name': competition_name,
-        'season_name': season_name
+        'season_name': season_name,
+        'points_deductions': points_deductions_by_team
     }
 
 def calculate_league_table_and_fixture_difficulties(sorted_rows):

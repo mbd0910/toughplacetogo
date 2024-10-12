@@ -32,6 +32,7 @@
         </thead>
         <tbody>
             {% load custom_filters %}
+            {% load mathfilters %}
             {% for row in league_table.sorted_rows %}
                 <tr>
                     {% with team_name=row.team.name %}
@@ -44,7 +45,9 @@
                     <td>{{ row.scored }}</td>
                     <td>{{ row.conceded }}</td>
                     <td>{{ row.goal_difference }}</td>
-                    <td>{{ row.points }}</td>
+                    {% with points_deduction=points_deductions|hash_default_zero:row.team %}
+                    <td>{{ row.points|sub:points_deduction }}{% if points_deduction > 0 %}*{% endif %}</td>
+                    {% endwith %}
                     <td>{{ row.xg }}</td>
                     <td>{{ row.xg_against }}</td>
                     <td>{{ row.x_points }}</td>
