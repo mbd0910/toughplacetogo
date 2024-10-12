@@ -379,3 +379,17 @@ class StageTeamMetric(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['stage', 'team', 'source'], name='unique_stage_team_source')
         ]
+
+class StagePointsDeduction(models.Model):
+    stage = models.ForeignKey(Stage, on_delete=models.RESTRICT, related_name='stage_deductions')
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='stage_deductions')
+    deduction = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'stage_points_deductions'
+
+        constraints = [
+            models.UniqueConstraint(fields=['stage', 'team'], name='unique_stage_team')
+        ]
