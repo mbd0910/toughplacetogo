@@ -125,3 +125,4 @@ class FixtureDifficultyTestCase(TestCase):
         self.assertAlmostEqual(0.59, weighted_fixture_difficulties.get(charlton))
         self.assertAlmostEqual(-0.25, weighted_fixture_difficulties.get(another_team))
         self.assertAlmostEqual(-0.275, weighted_fixture_difficulties.get(last_team))
+        
