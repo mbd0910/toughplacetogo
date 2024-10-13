@@ -4,7 +4,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from football.enums import ExternalSource
 from football.forms import GameTeamMetricForm
 from football.league_table import GamePOV, LeagueTable, LeagueTableRow, calculate_fixture_difficulties, \
-    normalise_fixture_difficulties
+    normalise_fixture_difficulties, weight_fixture_difficulties
 from football.models import Stage, StagePointsDeduction, Game, GameTeamMetric
 
 from typing import List
@@ -133,12 +133,17 @@ def calculate_traditional_league_table(stage, games, competition_name, season_na
     traditional_league_table = LeagueTable(rows_sorted_by_points)
     performance_points_fixture_difficulties = calculate_league_table_and_fixture_difficulties(rows_sorted_by_performance_points)
     x_points_normalised_difficulties = calculate_league_table_and_fixture_difficulties(rows_sorted_by_x_points)
+    weighted_fixture_difficulties = weight_fixture_difficulties(
+        0.3, performance_points_fixture_difficulties,
+        0.7, x_points_normalised_difficulties
+    )
 
     return {
         'league_table': traditional_league_table,
         'fixture_difficulties': {
             'traditional': performance_points_fixture_difficulties,
             'x_points': x_points_normalised_difficulties,
+            'weighted': weighted_fixture_difficulties
         },
         'competition_name': competition_name,
         'season_name': season_name
