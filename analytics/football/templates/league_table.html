@@ -28,15 +28,15 @@
             <tr>
                 <th>League Position</th>
                 <th>X Points</th>
+                <th>Weighted</th>
             </tr>
         </thead>
         <tbody>
             {% load custom_filters %}
             {% for row in league_table.sorted_rows %}
                 <tr>
-                    {% with team_name=row.team.name %}
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ team_name }}</td>
+                    <td>{{ row.team.name }}</td>
                     <td>{{ row.games_played }}</td>
                     <td>{{ row.wins }}</td>
                     <td>{{ row.draws }}</td>
@@ -55,9 +55,13 @@
                     {% endwith %}
                     {% with x_points_fixture_difficulty=fixture_difficulties.x_points|hash:row.team %}
                     <td style="background-color: {{ x_points_fixture_difficulty|fixture_difficulty_colour }}">
-                        {{ fixture_difficulties.x_points|hash:row.team|floatformat:"3" }}
+                        {{ x_points_fixture_difficulty|floatformat:"3" }}
                     </td>
                     {% endwith %}
+                    {% with weighted_fixture_difficulty=fixture_difficulties.weighted|hash:row.team %}
+                        <td style="background-color: {{ weighted_fixture_difficulty|fixture_difficulty_colour }}">
+                            {{ weighted_fixture_difficulty|floatformat:"3" }}
+                        </td>
                     {% endwith %}
                 </tr>
             {% endfor %}

@@ -1,6 +1,7 @@
 from django.test import TestCase
 
-from football.league_table import LeagueTableRow, GamePOV, LeagueTable, calculate_fixture_difficulties, calculate_fixture_difficulty
+from football.league_table import LeagueTableRow, GamePOV, LeagueTable, calculate_fixture_difficulties, \
+    calculate_fixture_difficulty, weight_fixture_difficulties
 from football.models import Team
 
 
@@ -99,3 +100,29 @@ class FixtureDifficultyTestCase(TestCase):
         self.assertEqual(2.5, fixture_difficulties[team4])
         self.assertEqual(4, fixture_difficulties[team5])
         self.assertEqual(2, fixture_difficulties[team6])
+
+    def test_weight_fixture_difficulties(self):
+        """Calculates weighted fixture difficulties for all teams in league"""
+        charlton = Team(id=1, name='Charlton')
+        another_team = Team(id=2, name='Another team')
+        last_team = Team(id=3, name='Last team')
+        league_position_fixture_difficulties = {
+            charlton: 0.5,
+            another_team: -0.4,
+            last_team: -0.2
+        }
+        x_points_fixture_difficulties = {
+            charlton: 0.8,
+            another_team: 0.1,
+            last_team: -0.45
+        }
+        weighted_fixture_difficulties = weight_fixture_difficulties(
+            0.7, league_position_fixture_difficulties,
+            0.3, x_points_fixture_difficulties
+        )
+
+        self.assertEqual(3, len(weighted_fixture_difficulties))
+        self.assertAlmostEqual(0.59, weighted_fixture_difficulties.get(charlton))
+        self.assertAlmostEqual(-0.25, weighted_fixture_difficulties.get(another_team))
+        self.assertAlmostEqual(-0.275, weighted_fixture_difficulties.get(last_team))
+        

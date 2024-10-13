@@ -116,3 +116,11 @@ def normalise_fixture_difficulties(team_to_raw_difficulty: Dict[Team, float]) ->
         team: normalized_difficulty
         for team, normalized_difficulty in zip(team_to_raw_difficulty.keys(), normalized_difficulties)
     }
+
+def weight_fixture_difficulties(league_position_weight: float, league_position_difficulties: Dict[Team, float],
+                                x_points_position_weight: float, x_points_position_difficulties: Dict[Team, float]):
+    return {
+        team: league_position_weight * weight + x_points_position_weight * x_points_position_difficulties.get(team)
+        for team, weight in league_position_difficulties.items()
+    }
+
