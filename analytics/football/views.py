@@ -100,11 +100,15 @@ def calculate_traditional_league_table(stage, games, competition_name, season_na
         home_goals = home_game_team.full_time_score
         away_goals = away_game_team.full_time_score
 
-        home_game_pov = GamePOV(home_team, away_team, home_goals, away_goals, is_home=True)
-        away_game_pov = GamePOV(away_team, home_team, away_goals, home_goals, is_home=False)
+        home_game_pov = GamePOV(home_team, away_team, is_home=True, scored=home_goals, conceded=away_goals)
+        away_game_pov = GamePOV(away_team, home_team, is_home=False, scored=away_goals, conceded=home_goals)
 
-        home_team_row.add_game_pov(home_game_pov)
-        away_team_row.add_game_pov(away_game_pov)
+        if game.finished:
+            home_team_row.add_result(home_game_pov)
+            away_team_row.add_result(away_game_pov)
+        else:
+            home_team_row.add_fixture(home_game_pov)
+            away_team_row.add_fixture(away_game_pov)
 
     for team_metrics in stage.team_metrics.all():
         team_row = get_league_table_row(team_metrics.team)

@@ -33,7 +33,7 @@ class FixtureDifficultyTestCase(TestCase):
         game_pov3 = GamePOV(team=team1, opposition=team7, scored=1, conceded=0, is_home=False)
         game_pov4 = GamePOV(team=team1, opposition=team8, scored=1, conceded=0, is_home=True)
         game_povs = [game_pov1, game_pov2, game_pov3, game_pov4]
-        league_table_row = LeagueTableRow(team=team1, game_povs=game_povs)
+        league_table_row = LeagueTableRow(team=team1, results=game_povs)
 
         league_table_position_fixture_difficulty = calculate_fixture_difficulty(league_table_row, team_to_position)
 
@@ -73,12 +73,12 @@ class FixtureDifficultyTestCase(TestCase):
             GamePOV(team=team6, opposition=team3, scored=0, conceded=0, is_home=False)
         ]
 
-        team1_row = LeagueTableRow(team=team1, game_povs=team1_game_povs)
-        team2_row = LeagueTableRow(team=team2, game_povs=team2_game_povs)
-        team3_row = LeagueTableRow(team=team3, game_povs=team3_game_povs)
-        team4_row = LeagueTableRow(team=team4, game_povs=team4_game_povs)
-        team5_row = LeagueTableRow(team=team5, game_povs=team5_game_povs)
-        team6_row = LeagueTableRow(team=team6, game_povs=team6_game_povs)
+        team1_row = LeagueTableRow(team=team1, results=team1_game_povs)
+        team2_row = LeagueTableRow(team=team2, results=team2_game_povs)
+        team3_row = LeagueTableRow(team=team3, results=team3_game_povs)
+        team4_row = LeagueTableRow(team=team4, results=team4_game_povs)
+        team5_row = LeagueTableRow(team=team5, results=team5_game_povs)
+        team6_row = LeagueTableRow(team=team6, results=team6_game_povs)
 
         league_table = LeagueTable(
             [
