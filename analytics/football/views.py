@@ -116,15 +116,15 @@ def calculate_contextual_league_table(stage, games, competition_name, season_nam
         team_row.xg_against = team_metrics.xg_against
         team_row.x_points = team_metrics.x_points
 
-    rows_sorted_by_performance_points = sorted(
-        rows_by_team_name.values(),
-        key=lambda row: (row.performance_points(), row.goal_difference(), row.scored, row.team.name),
-        reverse=True
-    )
-
     rows_sorted_by_points = sorted(
         rows_by_team_name.values(),
         key=lambda row: (row.points(), row.goal_difference(), row.scored, row.team.name),
+        reverse=True
+    )
+
+    rows_sorted_by_performance_points = sorted(
+        rows_by_team_name.values(),
+        key=lambda row: (row.performance_points_per_game(), row.goal_difference(), row.scored, row.team.name),
         reverse=True
     )
 
