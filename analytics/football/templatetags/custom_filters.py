@@ -16,7 +16,7 @@ def game_team_metrics(game_team: GameTeam, source):
     return None
 
 @register.filter
-def fixture_difficulty_colour(value):
+def difficulty_colour(value):
     clamped_value = max(-3, min(value, 3))
 
     if clamped_value < 0:

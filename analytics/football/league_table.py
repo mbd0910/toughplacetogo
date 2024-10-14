@@ -78,6 +78,9 @@ class LeagueTableRow:
     def most_recent_away_games(self, limit = 5):
         return self.most_recent_games_matching_criteria(is_home=False, limit=limit)
 
+    def games_remaining(self):
+        return len(self.fixtures)
+
     def most_recent_games_matching_criteria(self, is_home: bool, limit = 5):
         if limit <= 0:
             return []
@@ -99,22 +102,31 @@ class LeagueTable:
         return "\n".join(row.__str__() for row in self.sorted_rows)
 
 
-def calculate_fixture_difficulty(row: LeagueTableRow, team_to_position: Dict[Team, int]):
-    team_position = team_to_position[row.team]
+def calculate_games_difficulty(team: Team, games: List[GamePOV], team_to_position: Dict[Team, int]):
+    team_position = team_to_position[team]
     positions = [
         team_to_position[game_pov.opposition] - 1 if team_to_position[game_pov.opposition] > team_position else team_to_position[game_pov.opposition]
-        for game_pov in row.results
+        for game_pov in games
     ]
     return mean(positions) if positions else None
+
+def calculate_result_difficulties(league_table: LeagueTable) -> Dict[Team, float]:
+    team_to_position = league_table.team_to_position()
+    raw_league_position_fixture_difficulties = \
+        {row.team: calculate_games_difficulty(row.team, row.results, team_to_position) for row in league_table.sorted_rows}
+
+    return raw_league_position_fixture_difficulties
 
 def calculate_fixture_difficulties(league_table: LeagueTable) -> Dict[Team, float]:
     team_to_position = league_table.team_to_position()
     raw_league_position_fixture_difficulties = \
-        {row.team: calculate_fixture_difficulty(row, team_to_position) for row in league_table.sorted_rows}
+        {row.team: calculate_games_difficulty(row.team, row.fixtures, team_to_position) for row in league_table.sorted_rows}
 
     return raw_league_position_fixture_difficulties
 
-def normalise_fixture_difficulties(team_to_raw_difficulty: Dict[Team, float]) -> Dict[Team, float]:
+
+
+def normalise_difficulties(team_to_raw_difficulty: Dict[Team, float]) -> Dict[Team, float]:
     raw_difficulties = np.array(list(team_to_raw_difficulty.values()))
     normalized_difficulties = zscore(raw_difficulties)
 
@@ -123,8 +135,8 @@ def normalise_fixture_difficulties(team_to_raw_difficulty: Dict[Team, float]) ->
         for team, normalized_difficulty in zip(team_to_raw_difficulty.keys(), normalized_difficulties)
     }
 
-def weight_fixture_difficulties(league_position_weight: float, league_position_difficulties: Dict[Team, float],
-                                x_points_position_weight: float, x_points_position_difficulties: Dict[Team, float]):
+def weight_game_difficulties(league_position_weight: float, league_position_difficulties: Dict[Team, float],
+                             x_points_position_weight: float, x_points_position_difficulties: Dict[Team, float]):
     return {
         team: league_position_weight * weight + x_points_position_weight * x_points_position_difficulties.get(team)
         for team, weight in league_position_difficulties.items()

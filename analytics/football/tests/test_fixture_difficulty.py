@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from football.league_table import LeagueTableRow, GamePOV, LeagueTable, calculate_fixture_difficulties, \
-    calculate_fixture_difficulty, weight_fixture_difficulties
+from football.league_table import LeagueTableRow, GamePOV, LeagueTable, calculate_result_difficulties, \
+    calculate_games_difficulty, weight_game_difficulties
 from football.models import Team
 
 
@@ -33,9 +33,8 @@ class FixtureDifficultyTestCase(TestCase):
         game_pov3 = GamePOV(team=team1, opposition=team7, scored=1, conceded=0, is_home=False)
         game_pov4 = GamePOV(team=team1, opposition=team8, scored=1, conceded=0, is_home=True)
         game_povs = [game_pov1, game_pov2, game_pov3, game_pov4]
-        league_table_row = LeagueTableRow(team=team1, results=game_povs)
 
-        league_table_position_fixture_difficulty = calculate_fixture_difficulty(league_table_row, team_to_position)
+        league_table_position_fixture_difficulty = calculate_games_difficulty(team1, game_povs, team_to_position)
 
         self.assertEqual(4.75, league_table_position_fixture_difficulty)
 
@@ -91,7 +90,7 @@ class FixtureDifficultyTestCase(TestCase):
             ]
         )
 
-        fixture_difficulties = calculate_fixture_difficulties(league_table)
+        fixture_difficulties = calculate_result_difficulties(league_table)
 
         self.assertEqual(6, len(fixture_difficulties))
         self.assertEqual(3, fixture_difficulties[team1])
@@ -116,7 +115,7 @@ class FixtureDifficultyTestCase(TestCase):
             another_team: 0.1,
             last_team: -0.45
         }
-        weighted_fixture_difficulties = weight_fixture_difficulties(
+        weighted_fixture_difficulties = weight_game_difficulties(
             0.7, league_position_fixture_difficulties,
             0.3, x_points_fixture_difficulties
         )
