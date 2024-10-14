@@ -5,18 +5,20 @@ import numpy as np
 from scipy.stats import zscore
 
 class GamePOV:
-    def __init__(self, team: Team, opposition: Team, scored: int, conceded: int, is_home: bool):
+    def __init__(self, team: Team, opposition: Team, is_home: bool, scored: int, conceded: int):
         self.team = team
         self.opposition = opposition
+        self.is_home = is_home
         self.scored = scored
         self.conceded = conceded
-        self.is_home = is_home
 
 
 class LeagueTableRow:
-    def __init__(self, team: Team, points_deduction=0, game_povs=None, wins=0, draws=0):
-        if game_povs is None:
-            game_povs = []
+    def __init__(self, team: Team, points_deduction=0, results=None, fixtures=None, wins=0, draws=0):
+        if results is None:
+            results = []
+        if fixtures is None:
+            fixtures = []
         self.team = team
         self.points_deduction = points_deduction
         self.wins = wins
@@ -24,7 +26,8 @@ class LeagueTableRow:
         self.losses = 0
         self.scored = 0
         self.conceded = 0
-        self.game_povs = game_povs
+        self.results = results
+        self.fixtures = fixtures
         self.xg = 0
         self.xg_against = 0
         self.x_points = 0
@@ -47,8 +50,8 @@ class LeagueTableRow:
     def xg_difference(self):
         return self.xg - self.xg_against
 
-    def add_game_pov(self, game_pov: GamePOV):
-        self.game_povs.append(game_pov)
+    def add_result(self, game_pov: GamePOV):
+        self.results.append(game_pov)
         goals_scored = game_pov.scored
         goals_conceded = game_pov.conceded
         self.scored += goals_scored
@@ -61,10 +64,13 @@ class LeagueTableRow:
         else:
             self.losses += 1
 
+    def add_fixture(self, fixture_pov: GamePOV):
+        self.fixtures.append(fixture_pov)
+
     def most_recent_games(self, limit = 5):
         if limit <= 0:
             return []
-        return self.game_povs[-limit:]
+        return self.results[-limit:]
 
     def most_recent_home_games(self, limit = 5):
         return self.most_recent_games_matching_criteria(is_home=True, limit=limit)
@@ -75,7 +81,7 @@ class LeagueTableRow:
     def most_recent_games_matching_criteria(self, is_home: bool, limit = 5):
         if limit <= 0:
             return []
-        filtered_list = [game_pov for game_pov in self.game_povs if game_pov.is_home == is_home]
+        filtered_list = [game_pov for game_pov in self.results if game_pov.is_home == is_home]
         return filtered_list[-limit:]
 
     def __str__(self):
@@ -97,7 +103,7 @@ def calculate_fixture_difficulty(row: LeagueTableRow, team_to_position: Dict[Tea
     team_position = team_to_position[row.team]
     positions = [
         team_to_position[game_pov.opposition] - 1 if team_to_position[game_pov.opposition] > team_position else team_to_position[game_pov.opposition]
-        for game_pov in row.game_povs
+        for game_pov in row.results
     ]
     return mean(positions) if positions else None
 
