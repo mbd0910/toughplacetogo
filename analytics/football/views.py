@@ -130,7 +130,7 @@ def calculate_contextual_league_table(stage, games, competition_name, season_nam
 
     rows_sorted_by_x_points = sorted(
         rows_by_team_name.values(),
-        key=lambda row: (row.x_points, row.xg_difference()),
+        key=lambda row: (row.x_points_per_game(), row.xg_difference()),
         reverse=True
     )
 

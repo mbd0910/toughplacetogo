@@ -7,7 +7,7 @@
 <div class="flex flex-col items-center mx-10 md:mx-20">
     <h1 class="prose-2xl mb-4">Football League Table</h1>
     <a href="{% url 'metrics_management' competition_name season_name %}" class="link link-primary">Metrics management</a>
-    <table class="table table-zebra table-lg">
+    <table class="table table-zebra table-xs">
         <thead>
             <tr>
                 <th rowspan="2"></th>
@@ -17,19 +17,24 @@
             </tr>
             <tr>
                 <th>P</th>
+                <th>W</th>
+                <th>D</th>
+                <th>L</th>
                 <th>F</th>
                 <th>A</th>
                 <th>GD</th>
                 <th>Pts</th>
+                <th>PPts/g</th>
                 <th>xG</th>
                 <th>xGA</th>
-                <th>xPoints</th>
-                <th>Diff: Pos</th>
-                <th>Diff: xPts</th>
+                <th>xPts</th>
+                <th>xPts/g</th>
+                <th>Diff: PPts/g</th>
+                <th>Diff: xPts/g</th>
                 <th>Diff: Weighted</th>
                 <th>Games remaining</th>
-                <th>Diff: Pos</th>
-                <th>Diff: xPts</th>
+                <th>Diff: PPts/g</th>
+                <th>Diff: xPts/g</th>
                 <th>Diff: Weighted</th>
             </tr>
         </thead>
@@ -40,42 +45,47 @@
                     <td>{{ forloop.counter }}</td>
                     <td>{{ row.team.name }}</td>
                     <td>{{ row.games_played }}</td>
+                    <td>{{ row.wins }}</td>
+                    <td>{{ row.draws }}</td>
+                    <td>{{ row.losses }}</td>
                     <td>{{ row.scored }}</td>
                     <td>{{ row.conceded }}</td>
                     <td>{{ row.goal_difference }}</td>
                     <td>{{ row.points }}{% if row.has_points_deducted %}*{% endif %}</td>
+                    <td>{{ row.performance_points_per_game|floatformat:"2" }}</td>
                     <td>{{ row.xg }}</td>
                     <td>{{ row.xg_against }}</td>
                     <td>{{ row.x_points }}</td>
+                    <td>{{ row.x_points_per_game|floatformat:"2" }}</td>
                     {% with traditional_result_difficulty=result_difficulties.traditional|hash:row.team %}
                         <td style="background-color: {{ traditional_result_difficulty|difficulty_colour }}">
-                            {{ traditional_result_difficulty|floatformat:"3" }}
+                            {{ traditional_result_difficulty|floatformat:"2" }}
                         </td>
                     {% endwith %}
                     {% with x_points_result_difficulty=result_difficulties.x_points|hash:row.team %}
                         <td style="background-color: {{ x_points_result_difficulty|difficulty_colour }}">
-                            {{ x_points_result_difficulty|floatformat:"3" }}
+                            {{ x_points_result_difficulty|floatformat:"2" }}
                         </td>
                     {% endwith %}
                     {% with weighted_result_difficulty=result_difficulties.weighted|hash:row.team %}
                         <td style="background-color: {{ weighted_result_difficulty|difficulty_colour }}">
-                            {{ weighted_result_difficulty|floatformat:"3" }}
+                            {{ weighted_result_difficulty|floatformat:"2" }}
                         </td>
                     {% endwith %}
                     <td>{{ row.games_remaining }}</td>
                     {% with traditional_fixture_difficulty=fixture_difficulties.traditional|hash:row.team %}
                         <td style="background-color: {{ traditional_fixture_difficulty|difficulty_colour }}">
-                            {{ traditional_fixture_difficulty|floatformat:"3" }}
+                            {{ traditional_fixture_difficulty|floatformat:"2" }}
                         </td>
                     {% endwith %}
                     {% with x_points_fixture_difficulty=fixture_difficulties.x_points|hash:row.team %}
                         <td style="background-color: {{ x_points_fixture_difficulty|difficulty_colour }}">
-                            {{ x_points_fixture_difficulty|floatformat:"3" }}
+                            {{ x_points_fixture_difficulty|floatformat:"2" }}
                         </td>
                     {% endwith %}
                     {% with weighted_fixture_difficulty=fixture_difficulties.weighted|hash:row.team %}
                         <td style="background-color: {{ weighted_fixture_difficulty|difficulty_colour }}">
-                            {{ weighted_fixture_difficulty|floatformat:"3" }}
+                            {{ weighted_fixture_difficulty|floatformat:"2" }}
                         </td>
                     {% endwith %}
                 </tr>
