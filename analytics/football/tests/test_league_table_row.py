@@ -8,7 +8,7 @@ class LeagueTableRowTestCase(TestCase):
     def test_games_played(self):
         """Games played is wins + draws + losses"""
         charlton = Team(name='Charlton')
-        league_table_row = LeagueTableRow(Team(name='Charlton'))
+        league_table_row = LeagueTableRow(charlton)
         self.assertEqual(league_table_row.games_played(), 0)
 
         opposition1 = Team(name='Opposition 1')
@@ -178,3 +178,34 @@ class LeagueTableRowTestCase(TestCase):
         league_table_row = LeagueTableRow(Team(name='Charlton'), points_deduction=0, wins=4, draws=2)
         self.assertEqual(14, league_table_row.points())
         self.assertEqual(14, league_table_row.performance_points())
+
+    def test_performance_points_per_game(self):
+        charlton = Team(name='Charlton')
+        league_table_row = LeagueTableRow(charlton)
+
+        opposition1 = Team(name='Opposition 1')
+        opposition2 = Team(name='Opposition 2')
+        opposition3 = Team(name='Opposition 3')
+        opposition4 = Team(name='Opposition 4')
+        league_table_row.add_result(GamePOV(charlton, opposition1, scored=3, conceded=0, is_home=True))
+        league_table_row.add_result(GamePOV(charlton, opposition2, scored=0, conceded=1, is_home=False))
+        league_table_row.add_result(GamePOV(charlton, opposition3, scored=1, conceded=0, is_home=True))
+        league_table_row.add_result(GamePOV(charlton, opposition4, scored=0, conceded=0, is_home=True))
+        # 7 / 4 = 1.75
+        self.assertEqual(1.75, league_table_row.performance_points_per_game())
+
+    def test_x_points_per_game(self):
+        charlton = Team(name='Charlton')
+        league_table_row = LeagueTableRow(charlton)
+        league_table_row.x_points = 9.3
+        opposition1 = Team(name='Opposition 1')
+        opposition2 = Team(name='Opposition 2')
+        opposition3 = Team(name='Opposition 3')
+        opposition4 = Team(name='Opposition 4')
+        league_table_row.add_result(GamePOV(charlton, opposition1, scored=3, conceded=0, is_home=True))
+        league_table_row.add_result(GamePOV(charlton, opposition2, scored=0, conceded=1, is_home=False))
+        league_table_row.add_result(GamePOV(charlton, opposition3, scored=1, conceded=0, is_home=True))
+        league_table_row.add_result(GamePOV(charlton, opposition4, scored=0, conceded=0, is_home=True))
+        league_table_row.add_result(GamePOV(charlton, opposition1, scored=0, conceded=0, is_home=False))
+        # 9.3 / 5 = 1.86
+        self.assertEqual(1.86, league_table_row.x_points_per_game())

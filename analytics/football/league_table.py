@@ -44,6 +44,12 @@ class LeagueTableRow:
     def performance_points(self):
         return 3 * self.wins + self.draws
 
+    def performance_points_per_game(self):
+        return self.performance_points() / len(self.results)
+
+    def x_points_per_game(self):
+        return self.x_points / len(self.results)
+
     def goal_difference(self):
         return self.scored - self.conceded
 
