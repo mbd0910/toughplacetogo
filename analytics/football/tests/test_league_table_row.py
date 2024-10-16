@@ -209,3 +209,43 @@ class LeagueTableRowTestCase(TestCase):
         league_table_row.add_result(GamePOV(charlton, opposition1, scored=0, conceded=0, is_home=False))
         # 9.3 / 5 = 1.86
         self.assertEqual(1.86, league_table_row.x_points_per_game())
+
+    def test_xg_difference(self):
+        charlton = Team(name='Charlton')
+        league_table_row = LeagueTableRow(charlton)
+        league_table_row.xg = 2.4
+        league_table_row.xg_against = 3.1
+
+        self.assertAlmostEqual(-0.7, league_table_row.xg_difference())
+
+    def test_xg_difference_per_game(self):
+        charlton = Team(name='Charlton')
+        league_table_row = LeagueTableRow(charlton)
+        opposition1 = Team(name='Opposition 1')
+        opposition2 = Team(name='Opposition 2')
+        league_table_row.add_result(GamePOV(charlton, opposition1, scored=3, conceded=0, is_home=True))
+        league_table_row.add_result(GamePOV(charlton, opposition2, scored=0, conceded=1, is_home=False))
+        league_table_row.xg = 3.1
+        league_table_row.xg_against = 2.3
+        self.assertAlmostEqual(0.4, league_table_row.xg_difference_per_game())
+
+    def test_goal_difference(self):
+        charlton = Team(name='Charlton')
+        league_table_row = LeagueTableRow(charlton)
+        opposition1 = Team(name='Opposition 1')
+        opposition2 = Team(name='Opposition 2')
+        league_table_row.add_result(GamePOV(charlton, opposition1, scored=2, conceded=3, is_home=True))
+        league_table_row.add_result(GamePOV(charlton, opposition2, scored=0, conceded=1, is_home=False))
+        # 2 - 4
+        self.assertEqual(-2, league_table_row.goal_difference())
+
+    def test_goal_difference_per_game(self):
+        charlton = Team(name='Charlton')
+        league_table_row = LeagueTableRow(charlton)
+        opposition1 = Team(name='Opposition 1')
+        opposition2 = Team(name='Opposition 2')
+        league_table_row.add_result(GamePOV(charlton, opposition1, scored=2, conceded=1, is_home=True))
+        league_table_row.add_result(GamePOV(charlton, opposition2, scored=2, conceded=1, is_home=False))
+        league_table_row.add_result(GamePOV(charlton, opposition2, scored=5, conceded=4, is_home=False))
+        # (9 - 6) / 3
+        self.assertEqual(1, league_table_row.goal_difference_per_game())
