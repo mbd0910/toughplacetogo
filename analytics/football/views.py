@@ -5,9 +5,10 @@ from football.enums import ExternalSource
 from football.forms import GameTeamMetricForm
 from football.league_table import GamePOV, LeagueTable, LeagueTableRow, calculate_result_difficulties, \
     normalise_difficulties, weight_game_difficulties, calculate_fixture_difficulties
-from football.models import Stage, StagePointsDeduction, Game, GameTeamMetric
-
-from typing import List
+from football.models import Stage, StagePointsDeduction, Game, GameTeamMetric, Team
+from football.modelling.strength_of_schedule_calculator import calculate_strength_of_schedule, team_rating
+from football.modelling.game_chooser import ResultsChooser, FixturesChooser, GameChooser
+from typing import List, Dict
 
 
 def index(request):
@@ -77,17 +78,16 @@ def league_table(request, competition_name, season_name):
 
 
 def calculate_contextual_league_table(stage, games, competition_name, season_name):
-    rows_by_team_name = {}
+    rows_by_team = {}
 
     points_deductions = StagePointsDeduction.objects.filter(stage=stage)
     points_deduction_by_team = { points_deduction.team: points_deduction.deduction for points_deduction in points_deductions }
 
     def get_league_table_row(team):
-        team_name = team.name
-        if team_name not in rows_by_team_name:
+        if team not in rows_by_team:
             points_deduction = points_deduction_by_team[team] if team in points_deduction_by_team else 0
-            rows_by_team_name[team_name] = LeagueTableRow(team=team, points_deduction=points_deduction)
-        return rows_by_team_name[team_name]
+            rows_by_team[team] = LeagueTableRow(team=team, points_deduction=points_deduction)
+        return rows_by_team[team]
 
     for game in games:
         home_game_team = game.home_team()
@@ -117,19 +117,19 @@ def calculate_contextual_league_table(stage, games, competition_name, season_nam
         team_row.x_points = team_metrics.x_points
 
     rows_sorted_by_points = sorted(
-        rows_by_team_name.values(),
+        rows_by_team.values(),
         key=lambda row: (row.points(), row.goal_difference(), row.scored, row.team.name),
         reverse=True
     )
 
     rows_sorted_by_performance_points = sorted(
-        rows_by_team_name.values(),
+        rows_by_team.values(),
         key=lambda row: (row.performance_points_per_game(), row.goal_difference(), row.scored, row.team.name),
         reverse=True
     )
 
     rows_sorted_by_x_points = sorted(
-        rows_by_team_name.values(),
+        rows_by_team.values(),
         key=lambda row: (row.x_points_per_game(), row.xg_difference()),
         reverse=True
     )
@@ -152,20 +152,27 @@ def calculate_contextual_league_table(stage, games, competition_name, season_nam
         0.7, x_points_fixture_difficulties
     )
 
+    strength_of_results_schedule = normalise_difficulties(calculate_strength_of_results_schedule(rows_by_team))
+    strength_of_fixtures_schedule = normalise_difficulties(calculate_strength_of_fixtures_schedule(rows_by_team))
+    team_ratings = calculate_team_ratings(rows_by_team)
+
     return {
         'league_table': traditional_league_table,
         'result_difficulties': {
             'traditional': performance_points_results_difficulties,
             'x_points': x_points_results_difficulties,
-            'weighted': weighted_result_difficulties
+            'weighted': weighted_result_difficulties,
+            'sos': strength_of_results_schedule
         },
         'fixture_difficulties': {
             'traditional': performance_points_fixtures_difficulties,
             'x_points': x_points_fixture_difficulties,
-            'weighted': weighted_fixture_difficulties
+            'weighted': weighted_fixture_difficulties,
+            'sos': strength_of_fixtures_schedule
         },
         'competition_name': competition_name,
-        'season_name': season_name
+        'season_name': season_name,
+        'team_ratings': team_ratings
     }
 
 def calculate_normalised_result_difficulties(league_table: LeagueTable):
@@ -177,6 +184,24 @@ def calculate_normalised_fixture_difficulties(league_table: LeagueTable):
     fixture_difficulties = calculate_fixture_difficulties(league_table)
     normalised_fixture_difficulties = normalise_difficulties(fixture_difficulties)
     return normalised_fixture_difficulties
+
+def calculate_strength_of_schedules(game_chooser: GameChooser, rows_by_team: Dict[Team, LeagueTableRow]) -> Dict[Team, float]:
+    return {
+        team: calculate_strength_of_schedule(team, game_chooser, rows_by_team)
+        for team, row  in rows_by_team.items()
+    }
+
+def calculate_strength_of_results_schedule(rows_by_team: Dict[Team, LeagueTableRow]):
+    return calculate_strength_of_schedules(ResultsChooser(), rows_by_team)
+
+def calculate_strength_of_fixtures_schedule(rows_by_team: Dict[Team, LeagueTableRow]):
+    return calculate_strength_of_schedules(FixturesChooser(), rows_by_team)
+
+def calculate_team_ratings(rows_by_team: Dict[Team, LeagueTableRow]):
+    return {
+        team: team_rating(row)
+        for team, row in rows_by_team.items()
+    }
 
 def metrics_management_context(games: List[Game], competition_name, season_name):
     unique_sources = {

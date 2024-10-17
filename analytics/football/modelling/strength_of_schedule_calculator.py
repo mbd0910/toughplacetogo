@@ -8,13 +8,13 @@ from football.models import Team
 
 def calculate_opponents_ranking(team: Team,
                                 game_chooser: GameChooser,
-                                rows_by_team_name: Dict[str, LeagueTableRow],
+                                rows_by_team: Dict[Team, LeagueTableRow],
                                 remove_games_against: Team = None):
     if remove_games_against is None:
-        games = game_chooser.choose_games(rows_by_team_name[team.name])
+        games = game_chooser.choose_games(rows_by_team[team])
     else:
         games = remove_games_against_team(
-            game_chooser.choose_games(rows_by_team_name[team.name]),
+            game_chooser.choose_games(rows_by_team[team]),
             remove_games_against
         )
 
@@ -22,22 +22,22 @@ def calculate_opponents_ranking(team: Team,
         return None
 
     opponent_rankings = [
-        team_rating(rows_by_team_name[game_pov.opposition.name]) * home_advantage_multiplier(game_pov)
+        team_rating(rows_by_team[game_pov.opposition]) * home_advantage_multiplier(game_pov)
         for game_pov in games
     ]
     return mean(opponent_rankings)
 
 def calculate_opponents_opponents_ranking(team: Team,
                                           game_chooser: GameChooser,
-                                          rows_by_team_name: Dict[str, LeagueTableRow]):
+                                          rows_by_team: Dict[Team, LeagueTableRow]):
     opponents_opponents_rankings = [
         calculate_opponents_ranking(
             game_pov.opposition,
             game_chooser,
-            rows_by_team_name,
+            rows_by_team,
             team
         )
-        for game_pov in game_chooser.choose_games(rows_by_team_name[team.name])
+        for game_pov in game_chooser.choose_games(rows_by_team[team])
     ]
     opponents_opponents_rankings = [r for r in opponents_opponents_rankings if r is not None]
     return mean(opponents_opponents_rankings)
@@ -51,6 +51,6 @@ def home_advantage_multiplier(game_pov: GamePOV):
 def team_rating(league_table_row: LeagueTableRow):
     return 0.7 * league_table_row.xg_difference_per_game() + 0.3 * league_table_row.goal_difference_per_game()
 
-def calculate_strength_of_schedule(team: Team, game_chooser: GameChooser, rows_by_team_name: Dict[str, LeagueTableRow]):
-    return ((2/3) * calculate_opponents_ranking(team, game_chooser, rows_by_team_name)
-            + (1/3) * calculate_opponents_opponents_ranking(team, game_chooser, rows_by_team_name))
+def calculate_strength_of_schedule(team: Team, game_chooser: GameChooser, rows_by_team: Dict[Team, LeagueTableRow]):
+    return ((2/3) * calculate_opponents_ranking(team, game_chooser, rows_by_team)
+            + (1/3) * calculate_opponents_opponents_ranking(team, game_chooser, rows_by_team))
