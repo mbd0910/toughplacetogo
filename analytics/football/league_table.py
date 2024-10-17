@@ -54,13 +54,13 @@ class LeagueTableRow:
         return self.scored - self.conceded
 
     def goal_difference_per_game(self):
-        return self.goal_difference() / len(self.results)
+        return float(self.goal_difference() / len(self.results))
 
     def xg_difference(self):
         return self.xg - self.xg_against
 
     def xg_difference_per_game(self):
-        return self.xg_difference() / len(self.results)
+        return float(self.xg_difference() / len(self.results))
 
     def result_opponents(self):
         return [game_pov.opposition.name for game_pov in self.results]

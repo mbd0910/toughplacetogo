@@ -31,3 +31,7 @@ def difficulty_colour(value):
         alpha = green_intensity  # Fully opaque at +3, transparent at 0
 
     return f'rgba({int(red_intensity * 255)}, {int(green_intensity * 255)}, 0, {alpha})'
+
+@register.filter()
+def reverse_difficulty_colour(value):
+    return difficulty_colour(-value)
