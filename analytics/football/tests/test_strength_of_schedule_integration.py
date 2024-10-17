@@ -75,9 +75,9 @@ class StrengthOfScheduleIntegrationTestCase(TestCase):
             self.rows_by_team_name
         )
 
-        self.assertAlmostEqual(0.2608, team_1_opponents_ranking, 4)
-        self.assertAlmostEqual(-0.0033, team_2_opponents_ranking, 4)
-        self.assertAlmostEqual(-0.0342, team_3_opponents_ranking, 4)
+        self.assertAlmostEqual(0.3202, team_1_opponents_ranking, 4)
+        self.assertAlmostEqual(-0.0438, team_2_opponents_ranking, 4)
+        self.assertAlmostEqual(-0.0283, team_3_opponents_ranking, 4)
         self.assertAlmostEqual(0.0467, team_4_opponents_ranking, 4)
 
     def test_opponents_opponents_rankings(self):
@@ -102,10 +102,10 @@ class StrengthOfScheduleIntegrationTestCase(TestCase):
             self.rows_by_team_name
         )
 
-        self.assertAlmostEqual(0.0496, team_1_opponents_opponents_ranking, 4)
-        self.assertAlmostEqual(0.18, team_2_opponents_opponents_ranking)
-        self.assertAlmostEqual(-0.0979, team_3_opponents_opponents_ranking, 4)
-        self.assertAlmostEqual(0.18, team_4_opponents_opponents_ranking, 4)
+        self.assertAlmostEqual(0.0323, team_1_opponents_opponents_ranking, 4)
+        self.assertAlmostEqual(0.2394, team_2_opponents_opponents_ranking, 4)
+        self.assertAlmostEqual(-0.1282, team_3_opponents_opponents_ranking, 4)
+        self.assertAlmostEqual(0.1656, team_4_opponents_opponents_ranking, 4)
 
     def test_strength_of_schedules(self):
         team_1_strength_of_schedule = calculate_strength_of_schedule(
@@ -121,7 +121,7 @@ class StrengthOfScheduleIntegrationTestCase(TestCase):
             self.team_4, self.results_chooser, self.rows_by_team_name
         )
 
-        self.assertAlmostEqual(0.1904, team_1_strength_of_schedule, 4)
-        self.assertAlmostEqual(0.0578, team_2_strength_of_schedule, 4)
-        self.assertAlmostEqual(-0.0554, team_3_strength_of_schedule, 4)
-        self.assertAlmostEqual(0.0911, team_4_strength_of_schedule, 4)
+        self.assertAlmostEqual(0.2242, team_1_strength_of_schedule, 4)
+        self.assertAlmostEqual(0.0506, team_2_strength_of_schedule, 4)
+        self.assertAlmostEqual(-0.0616, team_3_strength_of_schedule, 4)
+        self.assertAlmostEqual(0.0863, team_4_strength_of_schedule, 4)

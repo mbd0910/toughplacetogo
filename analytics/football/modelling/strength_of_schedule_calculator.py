@@ -22,7 +22,7 @@ def calculate_opponents_ranking(team: Team,
         return None
 
     opponent_rankings = [
-        team_rating(rows_by_team_name[game_pov.opposition.name])
+        team_rating(rows_by_team_name[game_pov.opposition.name]) * home_advantage_multiplier(game_pov)
         for game_pov in games
     ]
     return mean(opponent_rankings)
@@ -44,6 +44,9 @@ def calculate_opponents_opponents_ranking(team: Team,
 
 def remove_games_against_team(games: List[GamePOV], team: Team):
     return [g for g in games if g.opposition != team]
+
+def home_advantage_multiplier(game_pov: GamePOV):
+    return 1.25 if not game_pov.is_home else 1.0
 
 def team_rating(league_table_row: LeagueTableRow):
     return 0.7 * league_table_row.xg_difference_per_game() + 0.3 * league_table_row.goal_difference_per_game()
