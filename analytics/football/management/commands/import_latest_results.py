@@ -1,7 +1,6 @@
-from datetime import datetime
-
-import pytz
+from dateutil import parser, tz
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from mobfot import MobFot
 
 from football.enums import GameExternalLinkType, CompetitionExternalLinkType, ExternalSource, TeamExternalLinkType, \
@@ -44,8 +43,12 @@ class Command(BaseCommand):
             status = match['status']
             has_finished = status['finished'] == True
             kickoff_string = status['utcTime']
-            kickoff = datetime.strptime(kickoff_string, "%Y-%m-%dT%H:%M:%SZ")
-            kickoff = kickoff.replace(tzinfo=pytz.UTC)
+            kickoff = parser.parse(kickoff_string)
+
+            if kickoff.tzinfo is None:
+                kickoff = kickoff.replace(tzinfo=tz.UTC)
+            else:
+                kickoff = kickoff.astimezone(tz.UTC)
 
             home_team = find_team(fot_mob_home_team_id, TeamExternalLinkType.ID, ExternalSource.FOT_MOB)
             away_team = find_team(fot_mob_away_team_id, TeamExternalLinkType.ID, ExternalSource.FOT_MOB)
@@ -111,6 +114,11 @@ class Command(BaseCommand):
             print(f'Updating game kickoff, finished flag and scoreline')
             game.kickoff = kickoff
             game.finished = has_finished
-            game.home_team().full_time_score = ft_home_goals
-            game.away_team().full_time_score = ft_away_goals
-            game.save()
+            with transaction.atomic():
+                game.save()
+                home_game_team = game.home_team()
+                home_game_team.full_time_score = ft_home_goals
+                home_game_team.save()
+                home_game_team = game.away_team()
+                home_game_team.full_time_score = ft_away_goals
+                home_game_team.save()
