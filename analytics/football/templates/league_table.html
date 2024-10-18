@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %}
 
 {% block title %}League Table{% endblock %}
@@ -12,8 +13,8 @@
             <tr>
                 <th rowspan="2"></th>
                 <th rowspan="2"></th>
-                <th colspan="12">Results</th>
-                <th colspan="5">Fixtures</th>
+                <th colspan="17">Results</th>
+                <th colspan="2">Fixtures</th>
             </tr>
             <tr>
                 <th>P</th>
@@ -32,14 +33,8 @@
                 <th>xPts</th>
                 <th>xPts/g</th>
                 <th>Rating</th>
-                <th>Diff: PPts/g</th>
-                <th>Diff: xPts/g</th>
-                <th>Diff: Weighted</th>
                 <th>SoS</th>
                 <th>Games remaining</th>
-                <th>Diff: PPts/g</th>
-                <th>Diff: xPts/g</th>
-                <th>Diff: Weighted</th>
                 <th>SoS</th>
             </tr>
         </thead>
@@ -67,42 +62,12 @@
                     {% with team_rating=team_ratings|hash:row.team %}
                         <td>{{ team_rating|floatformat:"2" }}</td>
                     {% endwith %}
-                    {% with traditional_result_difficulty=result_difficulties.traditional|hash:row.team %}
-                        <td style="background-color: {{ traditional_result_difficulty|difficulty_colour }}">
-                            {{ traditional_result_difficulty|floatformat:"2" }}
-                        </td>
-                    {% endwith %}
-                    {% with x_points_result_difficulty=result_difficulties.x_points|hash:row.team %}
-                        <td style="background-color: {{ x_points_result_difficulty|difficulty_colour }}">
-                            {{ x_points_result_difficulty|floatformat:"2" }}
-                        </td>
-                    {% endwith %}
-                    {% with weighted_result_difficulty=result_difficulties.weighted|hash:row.team %}
-                        <td style="background-color: {{ weighted_result_difficulty|difficulty_colour }}">
-                            {{ weighted_result_difficulty|floatformat:"2" }}
-                        </td>
-                    {% endwith %}
                     {% with result_sos=result_difficulties.sos|hash:row.team %}
                         <td style="background-color: {{ result_sos|reverse_difficulty_colour }}">
                             {{ result_sos|floatformat:"2" }}
                         </td>
                     {% endwith %}
                     <td>{{ row.games_remaining }}</td>
-                    {% with traditional_fixture_difficulty=fixture_difficulties.traditional|hash:row.team %}
-                        <td style="background-color: {{ traditional_fixture_difficulty|difficulty_colour }}">
-                            {{ traditional_fixture_difficulty|floatformat:"2" }}
-                        </td>
-                    {% endwith %}
-                    {% with x_points_fixture_difficulty=fixture_difficulties.x_points|hash:row.team %}
-                        <td style="background-color: {{ x_points_fixture_difficulty|difficulty_colour }}">
-                            {{ x_points_fixture_difficulty|floatformat:"2" }}
-                        </td>
-                    {% endwith %}
-                    {% with weighted_fixture_difficulty=fixture_difficulties.weighted|hash:row.team %}
-                        <td style="background-color: {{ weighted_fixture_difficulty|difficulty_colour }}">
-                            {{ weighted_fixture_difficulty|floatformat:"2" }}
-                        </td>
-                    {% endwith %}
                     {% with fixture_sos=fixture_difficulties.sos|hash:row.team %}
                         <td style="background-color: {{ fixture_sos|reverse_difficulty_colour }}">
                             {{ fixture_sos|floatformat:"2" }}

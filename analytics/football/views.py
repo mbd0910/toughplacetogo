@@ -1,14 +1,14 @@
+from typing import List, Dict
+
 from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 
 from football.enums import ExternalSource
 from football.forms import GameTeamMetricForm
-from football.league_table import GamePOV, LeagueTable, LeagueTableRow, calculate_result_difficulties, \
-    normalise_difficulties, weight_game_difficulties, calculate_fixture_difficulties
-from football.models import Stage, StagePointsDeduction, Game, GameTeamMetric, Team
-from football.modelling.strength_of_schedule_calculator import calculate_strength_of_schedule, team_rating
+from football.league_table import GamePOV, LeagueTable, LeagueTableRow, normalise_difficulties
 from football.modelling.game_chooser import ResultsChooser, FixturesChooser, GameChooser
-from typing import List, Dict
+from football.modelling.strength_of_schedule_calculator import calculate_strength_of_schedule, team_rating
+from football.models import Stage, StagePointsDeduction, Game, GameTeamMetric, Team
 
 
 def index(request):
@@ -135,23 +135,6 @@ def calculate_contextual_league_table(stage, games, competition_name, season_nam
     )
 
     traditional_league_table = LeagueTable(rows_sorted_by_points)
-    performance_points_league_table = LeagueTable(rows_sorted_by_performance_points)
-    x_points_league_table = LeagueTable(rows_sorted_by_x_points)
-
-    performance_points_results_difficulties = calculate_normalised_result_difficulties(performance_points_league_table)
-    x_points_results_difficulties = calculate_normalised_result_difficulties(x_points_league_table)
-    weighted_result_difficulties = weight_game_difficulties(
-        0.3, performance_points_results_difficulties,
-        0.7, x_points_results_difficulties
-    )
-
-    performance_points_fixtures_difficulties = calculate_normalised_fixture_difficulties(performance_points_league_table)
-    x_points_fixture_difficulties = calculate_normalised_fixture_difficulties(x_points_league_table)
-    weighted_fixture_difficulties = weight_game_difficulties(
-        0.3, performance_points_fixtures_difficulties,
-        0.7, x_points_fixture_difficulties
-    )
-
     strength_of_results_schedule = normalise_difficulties(calculate_strength_of_results_schedule(rows_by_team))
     strength_of_fixtures_schedule = normalise_difficulties(calculate_strength_of_fixtures_schedule(rows_by_team))
     team_ratings = calculate_team_ratings(rows_by_team)
@@ -159,31 +142,15 @@ def calculate_contextual_league_table(stage, games, competition_name, season_nam
     return {
         'league_table': traditional_league_table,
         'result_difficulties': {
-            'traditional': performance_points_results_difficulties,
-            'x_points': x_points_results_difficulties,
-            'weighted': weighted_result_difficulties,
             'sos': strength_of_results_schedule
         },
         'fixture_difficulties': {
-            'traditional': performance_points_fixtures_difficulties,
-            'x_points': x_points_fixture_difficulties,
-            'weighted': weighted_fixture_difficulties,
             'sos': strength_of_fixtures_schedule
         },
         'competition_name': competition_name,
         'season_name': season_name,
         'team_ratings': team_ratings
     }
-
-def calculate_normalised_result_difficulties(league_table: LeagueTable):
-    result_difficulties = calculate_result_difficulties(league_table)
-    normalised_result_difficulties = normalise_difficulties(result_difficulties)
-    return normalised_result_difficulties
-
-def calculate_normalised_fixture_difficulties(league_table: LeagueTable):
-    fixture_difficulties = calculate_fixture_difficulties(league_table)
-    normalised_fixture_difficulties = normalise_difficulties(fixture_difficulties)
-    return normalised_fixture_difficulties
 
 def calculate_strength_of_schedules(game_chooser: GameChooser, rows_by_team: Dict[Team, LeagueTableRow]) -> Dict[Team, float]:
     return {
