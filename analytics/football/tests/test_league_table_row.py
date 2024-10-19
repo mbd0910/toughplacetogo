@@ -151,7 +151,8 @@ class LeagueTableRowTestCase(TestCase):
         self.assertEqual(len(league_table_row.upcoming_games(3)), 3)
         self.assertEqual(len(league_table_row.upcoming_games(4)), 4)
         self.assertEqual(len(league_table_row.upcoming_games(5)), 5)
-        self.assertEqual(len(league_table_row.upcoming_games(6)), 5)
+        self.assertEqual(len(league_table_row.upcoming_games(6)), 6)
+        self.assertEqual(len(league_table_row.upcoming_games(7)), 6)
 
         upcoming_games = league_table_row.upcoming_games(3)
         self.assertNotIn(game_pov4, upcoming_games)
