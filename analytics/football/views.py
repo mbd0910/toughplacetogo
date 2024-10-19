@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from football.enums import ExternalSource
 from football.forms import GameTeamMetricForm
 from football.league_table import GamePOV, LeagueTable, LeagueTableRow, normalise_difficulties
-from football.modelling.game_chooser import ResultsChooser, FixturesChooser, GameChooser
+from football.modelling.game_chooser import ResultsChooser, FixturesChooser, GameChooser, RecentFormChooser, UpcomingGamesChooser
 from football.modelling.strength_of_schedule_calculator import calculate_strength_of_schedule, team_rating
 from football.models import Stage, StagePointsDeduction, Game, GameTeamMetric, Team
 
@@ -136,16 +136,20 @@ def calculate_contextual_league_table(stage, games, competition_name, season_nam
 
     traditional_league_table = LeagueTable(rows_sorted_by_points)
     strength_of_results_schedule = normalise_difficulties(calculate_strength_of_results_schedule(rows_by_team))
+    strength_of_form_schedule = normalise_difficulties(calculate_strength_of_recent_form_schedule(rows_by_team))
     strength_of_fixtures_schedule = normalise_difficulties(calculate_strength_of_fixtures_schedule(rows_by_team))
+    strength_of_upcoming_schedule = normalise_difficulties(calculate_strength_of_upcoming_games_schedule(rows_by_team))
     team_ratings = calculate_team_ratings(rows_by_team)
 
     return {
         'league_table': traditional_league_table,
         'result_difficulties': {
-            'sos': strength_of_results_schedule
+            'sos': strength_of_results_schedule,
+            'form': strength_of_form_schedule
         },
         'fixture_difficulties': {
-            'sos': strength_of_fixtures_schedule
+            'sos': strength_of_fixtures_schedule,
+            'upcoming': strength_of_upcoming_schedule
         },
         'competition_name': competition_name,
         'season_name': season_name,
@@ -161,8 +165,14 @@ def calculate_strength_of_schedules(game_chooser: GameChooser, rows_by_team: Dic
 def calculate_strength_of_results_schedule(rows_by_team: Dict[Team, LeagueTableRow]):
     return calculate_strength_of_schedules(ResultsChooser(), rows_by_team)
 
+def calculate_strength_of_recent_form_schedule(rows_by_team: Dict[Team, LeagueTableRow]):
+    return calculate_strength_of_schedules(RecentFormChooser(), rows_by_team)
+
 def calculate_strength_of_fixtures_schedule(rows_by_team: Dict[Team, LeagueTableRow]):
     return calculate_strength_of_schedules(FixturesChooser(), rows_by_team)
+
+def calculate_strength_of_upcoming_games_schedule(rows_by_team: Dict[Team, LeagueTableRow]):
+    return calculate_strength_of_schedules(UpcomingGamesChooser(), rows_by_team)
 
 def calculate_team_ratings(rows_by_team: Dict[Team, LeagueTableRow]):
     return {

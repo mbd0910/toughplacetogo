@@ -121,6 +121,46 @@ class LeagueTableRowTestCase(TestCase):
         self.assertIn(game_pov5, most_recent_home_games)
         self.assertIn(game_pov6, most_recent_home_games)
 
+    def test_upcoming_games(self):
+        """Test upcoming X games"""
+        charlton = Team(name='Charlton')
+        league_table_row = LeagueTableRow(Team(name='Charlton'))
+        self.assertEqual(league_table_row.upcoming_games(), [])
+
+        opposition1 = Team(name='Opposition 1')
+        opposition2 = Team(name='Opposition 2')
+        opposition3 = Team(name='Opposition 3')
+        opposition4 = Team(name='Opposition 4')
+        opposition5 = Team(name='Opposition 5')
+        opposition6 = Team(name='Opposition 6')
+        game_pov1 = GamePOV(charlton, opposition1, scored=1, conceded=0, is_home=True)
+        game_pov2 = GamePOV(charlton, opposition2, scored=1, conceded=1, is_home=True)
+        game_pov3 = GamePOV(charlton, opposition3, scored=0, conceded=1, is_home=True)
+        game_pov4 = GamePOV(charlton, opposition4, scored=3, conceded=3, is_home=False)
+        game_pov5 = GamePOV(charlton, opposition5, scored=2, conceded=0, is_home=True)
+        game_pov6 = GamePOV(charlton, opposition6, scored=2, conceded=1, is_home=True)
+        league_table_row.add_fixture(game_pov1)
+        league_table_row.add_fixture(game_pov2)
+        league_table_row.add_fixture(game_pov3)
+        league_table_row.add_fixture(game_pov4)
+        league_table_row.add_fixture(game_pov5)
+        league_table_row.add_fixture(game_pov6)
+
+        self.assertEqual(len(league_table_row.upcoming_games(1)), 1)
+        self.assertEqual(len(league_table_row.upcoming_games(2)), 2)
+        self.assertEqual(len(league_table_row.upcoming_games(3)), 3)
+        self.assertEqual(len(league_table_row.upcoming_games(4)), 4)
+        self.assertEqual(len(league_table_row.upcoming_games(5)), 5)
+        self.assertEqual(len(league_table_row.upcoming_games(6)), 5)
+
+        upcoming_games = league_table_row.upcoming_games(3)
+        self.assertNotIn(game_pov4, upcoming_games)
+        self.assertNotIn(game_pov5, upcoming_games)
+        self.assertNotIn(game_pov6, upcoming_games)
+        self.assertIn(game_pov1, upcoming_games)
+        self.assertIn(game_pov2, upcoming_games)
+        self.assertIn(game_pov3, upcoming_games)
+
     def test_most_recent_away_games(self):
         """Finds most recent X away games"""
         charlton = Team(name='Charlton')
