@@ -87,6 +87,11 @@ class LeagueTableRow:
             return []
         return self.results[-limit:]
 
+    def upcoming_games(self, limit = 5):
+        if limit <= 0:
+            return []
+        return self.fixtures[:limit]
+
     def most_recent_home_games(self, limit = 5):
         return self.most_recent_games_matching_criteria(is_home=True, limit=limit)
 
