@@ -59,8 +59,27 @@
         {% endblock %}
     </main>
 
-    <footer>
-        <p>&copy; 2024 My Django Site</p>
+    <footer class="flex flex-col sm:flex-row gap-8 justify-between p-10 bg-base-200">
+
+        <aside>
+            <p class="text-lg flex items-center gap-2">
+{#                <img alt="Logo" src="/logo.svg" class="inline w-6" />#}
+                TPTG
+            </p>
+            <small>Copyright © 2024 - All rights reserved</small>
+        </aside>
+
+        <nav class="flex gap-4">
+            <a href="https://github.com/mbd0910" class="btn btn-ghost btn-sm btn-circle">
+                <i class="fa-brands fa-github text-2xl"></i>
+            </a>
+            <a href="https://x.com/toughplacetogo" class="btn btn-ghost btn-sm btn-circle">
+                <i class="fa-brands fa-twitter text-2xl"></i>
+            </a>
+            <a href="https://www.youtube.com/@michaeldavis4904" class="btn btn-ghost btn-sm btn-circle">
+                <i class="fa-brands fa-youtube text-2xl"></i>
+            </a>
+        </nav>
     </footer>
 </body>
 </html>
