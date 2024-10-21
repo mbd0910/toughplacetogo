@@ -10,6 +10,9 @@ from football.modelling.game_chooser import ResultsChooser, FixturesChooser, Gam
 from football.modelling.strength_of_schedule_calculator import calculate_strength_of_schedule, team_rating
 from football.models import Stage, StagePointsDeduction, Game, GameTeamMetric, Team
 
+from django.shortcuts import redirect
+from django.urls import reverse
+
 
 def index(request):
     return HttpResponse("Hello, world. You're at the analytics index.")
@@ -70,6 +73,10 @@ def game_view(request, game_id: int):
 
 
 def league_table(request, competition_name, season_name):
+    current_season = '2024-2025'
+    if season_name != current_season:
+        return redirect(reverse('league_table', args=[competition_name, current_season]))
+
     db_competition_name, db_season_name = convert_competition_and_season_names(competition_name, season_name)
     stage, games = get_games_for_stage(db_competition_name, db_season_name)
     context = calculate_contextual_league_table(stage, games, competition_name, season_name)
