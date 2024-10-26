@@ -133,18 +133,6 @@ def calculate_contextual_league_table(stage, games, competition_name, season_nam
         reverse=True
     )
 
-    rows_sorted_by_performance_points = sorted(
-        rows_by_team.values(),
-        key=lambda row: (row.performance_points_per_game(), row.goal_difference(), row.scored, row.team.name),
-        reverse=True
-    )
-
-    rows_sorted_by_x_points = sorted(
-        rows_by_team.values(),
-        key=lambda row: (row.x_points_per_game(), row.xg_difference()),
-        reverse=True
-    )
-
     traditional_league_table = LeagueTable(rows_sorted_by_points)
     strength_of_results_schedule = normalise_difficulties(calculate_strength_of_results_schedule(rows_by_team))
     strength_of_form_schedule = normalise_difficulties(calculate_strength_of_recent_form_schedule(rows_by_team))
