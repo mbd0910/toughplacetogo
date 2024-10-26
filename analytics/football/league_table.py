@@ -1,8 +1,10 @@
-from football.models import Team
 from typing import List, Dict
-from statistics import mean
+
 import numpy as np
 from scipy.stats import zscore
+
+from football.models import Team
+
 
 class GamePOV:
     def __init__(self, team: Team, opposition: Team, is_home: bool, scored: int, conceded: int):
@@ -87,7 +89,7 @@ class LeagueTableRow:
             return []
         return self.results[-limit:]
 
-    def upcoming_games(self, limit = 5):
+    def upcoming_games(self, limit = 5) -> List[GamePOV]:
         if limit <= 0:
             return []
         return self.fixtures[:limit]

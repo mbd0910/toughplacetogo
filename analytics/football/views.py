@@ -1,3 +1,4 @@
+from itertools import product
 from typing import List, Dict
 
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -138,6 +139,7 @@ def calculate_contextual_league_table(stage, games, competition_name, season_nam
     strength_of_form_schedule = normalise_difficulties(calculate_strength_of_recent_form_schedule(rows_by_team))
     strength_of_fixtures_schedule = normalise_difficulties(calculate_strength_of_fixtures_schedule(rows_by_team))
     strength_of_upcoming_schedule = normalise_difficulties(calculate_strength_of_upcoming_games_schedule(rows_by_team))
+    upcoming_opponent_ratings = upcoming_opponent_ratings_for_all_teams(rows_by_team)
     team_ratings = calculate_team_ratings(rows_by_team)
 
     return {
@@ -148,7 +150,8 @@ def calculate_contextual_league_table(stage, games, competition_name, season_nam
         },
         'fixture_difficulties': {
             'sos': strength_of_fixtures_schedule,
-            'upcoming': strength_of_upcoming_schedule
+            'upcoming': strength_of_upcoming_schedule,
+            'upcoming_opponent_ratings': upcoming_opponent_ratings
         },
         'competition_name': competition_name,
         'season_name': season_name,
@@ -176,6 +179,18 @@ def calculate_strength_of_upcoming_games_schedule(rows_by_team: Dict[Team, Leagu
 def calculate_team_ratings(rows_by_team: Dict[Team, LeagueTableRow]):
     return {
         team: team_rating(row)
+        for team, row in rows_by_team.items()
+    }
+
+def upcoming_opponent_ratings(league_table_row: LeagueTableRow, rows_by_team: Dict[Team, LeagueTableRow]):
+    return [
+        f"{team_rating(rows_by_team[game_pov.opposition]):.2f}"
+        for game_pov in league_table_row.upcoming_games(5)
+    ]
+
+def upcoming_opponent_ratings_for_all_teams(rows_by_team: Dict[Team, LeagueTableRow]):
+    return {
+        team: upcoming_opponent_ratings(row, rows_by_team)
         for team, row in rows_by_team.items()
     }
 
