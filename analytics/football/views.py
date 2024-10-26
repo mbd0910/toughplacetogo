@@ -1,17 +1,17 @@
 from typing import List, Dict
 
-from django.http import HttpResponse
-from django.shortcuts import redirect, render, get_object_or_404
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.shortcuts import redirect
+from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
 
 from football.enums import ExternalSource
 from football.forms import GameTeamMetricForm
 from football.league_table import GamePOV, LeagueTable, LeagueTableRow, normalise_difficulties
-from football.modelling.game_chooser import ResultsChooser, FixturesChooser, GameChooser, RecentFormChooser, UpcomingGamesChooser
+from football.modelling.game_chooser import ResultsChooser, FixturesChooser, GameChooser, RecentFormChooser, \
+    UpcomingGamesChooser
 from football.modelling.strength_of_schedule_calculator import calculate_strength_of_schedule, team_rating
 from football.models import Stage, StagePointsDeduction, Game, GameTeamMetric, Team
-
-from django.shortcuts import redirect
-from django.urls import reverse
 
 
 def index(request):
@@ -77,7 +77,11 @@ def league_table(request, competition_name, season_name):
     if season_name != current_season:
         return redirect(reverse('league_table', args=[competition_name, current_season]))
 
-    db_competition_name, db_season_name = convert_competition_and_season_names(competition_name, season_name)
+    try:
+        db_competition_name, db_season_name = convert_competition_and_season_names(competition_name, season_name)
+    except UnsupportedCompetitionError as e:
+        return HttpResponseBadRequest(str(e))
+
     stage, games = get_games_for_stage(db_competition_name, db_season_name)
     context = calculate_contextual_league_table(stage, games, competition_name, season_name)
 
@@ -208,18 +212,20 @@ def metrics_management_context(games: List[Game], competition_name, season_name)
 def convert_competition_and_season_names(competition_name, season_name):
     return convert_competition_name_from_url_to_db(competition_name), convert_season_name_from_url_to_db(season_name)
 
+class UnsupportedCompetitionError(Exception):
+    pass
+
 def convert_competition_name_from_url_to_db(competition_name):
-    match competition_name:
-        case 'premier-league':
-            return 'Premier League'
-        case 'championship':
-            return 'Championship'
-        case 'league-one':
-            return 'League One'
-        case 'league-two':
-            return 'League Two'
-        case _:
-            raise NotImplementedError(f'Unknown competition {competition_name}')
+    competition_map = {
+        'premier-league': 'Premier League',
+        'championship': 'Championship',
+        'league-one': 'League One',
+        'league-two': 'League Two'
+    }
+    try:
+        return competition_map[competition_name]
+    except KeyError:
+        raise UnsupportedCompetitionError(f'Unsupported competition: {competition_name}')
 
 def convert_competition_name_from_db_to_url(competition_name):
     return str.lower(competition_name).replace(' ', '-')
