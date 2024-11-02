@@ -2,9 +2,10 @@ from django.test import TestCase
 
 from football.league_table import GamePOV, LeagueTableRow
 from football.modelling.game_chooser import ResultsChooser
-from football.modelling.strength_of_schedule_calculator import team_rating, calculate_strength_of_schedule, \
+from football.modelling.strength_of_schedule_calculator import calculate_strength_of_schedule, \
     calculate_opponents_ranking, calculate_opponents_opponents_ranking
 from football.models import Team
+from football.modelling.team_rating_strategy import WeightedGoalDifferenceTeamRatingStrategy
 
 
 class StrengthOfScheduleIntegrationTestCase(TestCase):
@@ -40,39 +41,35 @@ class StrengthOfScheduleIntegrationTestCase(TestCase):
         team_4: team_4_row,
     }
 
+    weighted_goal_difference_team_rating_strategy = WeightedGoalDifferenceTeamRatingStrategy(0.7)
+    team_ratings = weighted_goal_difference_team_rating_strategy.calculate_team_ratings(rows_by_team)
+
     results_chooser = ResultsChooser()
-
-    def test_team_ratings(self):
-        team_1_rating = team_rating(self.team_1_row)
-        team_2_rating = team_rating(self.team_2_row)
-        team_3_rating = team_rating(self.team_3_row)
-        team_4_rating = team_rating(self.team_4_row)
-
-        self.assertAlmostEqual(-0.115, team_1_rating)
-        self.assertAlmostEqual(0.0467, team_2_rating, 4)
-        self.assertAlmostEqual(0.475, team_3_rating)
-        self.assertAlmostEqual(-0.37, team_4_rating)
 
     def test_opponents_rankings(self):
         team_1_opponents_ranking = calculate_opponents_ranking(
             self.team_1,
             self.results_chooser,
-            self.rows_by_team
+            self.rows_by_team,
+            self.team_ratings
         )
         team_2_opponents_ranking = calculate_opponents_ranking(
             self.team_2,
             self.results_chooser,
-            self.rows_by_team
+            self.rows_by_team,
+            self.team_ratings
         )
         team_3_opponents_ranking = calculate_opponents_ranking(
             self.team_3,
             self.results_chooser,
-            self.rows_by_team
+            self.rows_by_team,
+            self.team_ratings
         )
         team_4_opponents_ranking = calculate_opponents_ranking(
             self.team_4,
             self.results_chooser,
-            self.rows_by_team
+            self.rows_by_team,
+            self.team_ratings
         )
 
         self.assertAlmostEqual(0.3202, team_1_opponents_ranking, 4)
@@ -84,22 +81,26 @@ class StrengthOfScheduleIntegrationTestCase(TestCase):
         team_1_opponents_opponents_ranking = calculate_opponents_opponents_ranking(
             self.team_1,
             self.results_chooser,
-            self.rows_by_team
+            self.rows_by_team,
+            self.team_ratings
         )
         team_2_opponents_opponents_ranking = calculate_opponents_opponents_ranking(
             self.team_2,
             self.results_chooser,
-            self.rows_by_team
+            self.rows_by_team,
+            self.team_ratings
         )
         team_3_opponents_opponents_ranking = calculate_opponents_opponents_ranking(
             self.team_3,
             self.results_chooser,
-            self.rows_by_team
+            self.rows_by_team,
+            self.team_ratings
         )
         team_4_opponents_opponents_ranking = calculate_opponents_opponents_ranking(
             self.team_4,
             self.results_chooser,
-            self.rows_by_team
+            self.rows_by_team,
+            self.team_ratings
         )
 
         self.assertAlmostEqual(0.0323, team_1_opponents_opponents_ranking, 4)
@@ -109,16 +110,16 @@ class StrengthOfScheduleIntegrationTestCase(TestCase):
 
     def test_strength_of_schedules(self):
         team_1_strength_of_schedule = calculate_strength_of_schedule(
-            self.team_1, self.results_chooser, self.rows_by_team
+            self.team_1, self.results_chooser, self.rows_by_team, self.team_ratings
         )
         team_2_strength_of_schedule = calculate_strength_of_schedule(
-            self.team_2, self.results_chooser, self.rows_by_team
+            self.team_2, self.results_chooser, self.rows_by_team, self.team_ratings
         )
         team_3_strength_of_schedule = calculate_strength_of_schedule(
-            self.team_3, self.results_chooser, self.rows_by_team
+            self.team_3, self.results_chooser, self.rows_by_team, self.team_ratings
         )
         team_4_strength_of_schedule = calculate_strength_of_schedule(
-            self.team_4, self.results_chooser, self.rows_by_team
+            self.team_4, self.results_chooser, self.rows_by_team, self.team_ratings
         )
 
         self.assertAlmostEqual(0.2242, team_1_strength_of_schedule, 4)
