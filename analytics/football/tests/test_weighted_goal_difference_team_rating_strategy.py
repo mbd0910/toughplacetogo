@@ -2,13 +2,11 @@ from django.test import TestCase
 
 from football.league_table import GamePOV, LeagueTableRow
 from football.modelling.game_chooser import ResultsChooser
-from football.modelling.strength_of_schedule_calculator import calculate_strength_of_schedule, \
-    calculate_opponents_ranking, calculate_opponents_opponents_ranking
-from football.models import Team
 from football.modelling.team_rating_strategy import WeightedGoalDifferenceTeamRatingStrategy
+from football.models import Team
 
 
-class StrengthOfScheduleIntegrationTestCase(TestCase):
+class WeightedGoalDifferenceTeamRatingStrategyTestCase(TestCase):
     team_1 = Team(id=1, name='Team 1')
     team_2 = Team(id=2, name='Team 2')
     team_3 = Team(id=3, name='Team 3')
